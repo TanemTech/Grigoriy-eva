@@ -69,6 +69,37 @@ def check(browser, width, height, mobile, language):
     if not data["media"]["portfolio"]:
         portfolio_section = page.locator("#salonDesktopPortfolio" if desktop else "#tn13Portfolio")
         assert portfolio_section.is_hidden(), "Empty portfolio should remain optional"
+
+    # The full gallery must render every configured image on both layouts.
+    gallery_groups = data.get("media", {}).get("gallery", {})
+    gallery_counts = {category: len(items) for category, items in gallery_groups.items()}
+    gallery_total = sum(gallery_counts.values())
+    gallery_sources = [
+        item if isinstance(item, str) else item.get("src")
+        for items in gallery_groups.values() for item in items
+    ]
+    assert gallery_total > 25, f"Unlimited-gallery regression needs more than 25 photos, got {gallery_total}"
+    assert len(set(gallery_sources)) == gallery_total, "Gallery sources must be unique"
+    if desktop:
+        page.locator("#stdOpenGallery").click(timeout=9000)
+        page.locator("#stdGalleryBrowser.open").wait_for(timeout=8000)
+        for category, expected_count in gallery_counts.items():
+            page.locator(f'#stdGalleryBrowserTabs [data-gallery-category="{category}"]').click(timeout=9000)
+            actual_count = page.locator("#stdGalleryBrowserGrid .std-gallery-browser-tile").count()
+            assert actual_count == expected_count, (
+                f"Desktop gallery category {category!r}: {actual_count} photos instead of {expected_count}"
+            )
+        page.locator("#stdGalleryBrowserBack").click(timeout=9000)
+    else:
+        page.locator("#tn13Portfolio .tn22-port-all").click(timeout=9000)
+        page.locator("#tn13Gallery.open").wait_for(timeout=8000)
+        for category, expected_count in gallery_counts.items():
+            page.locator(f'#tn13Gallery [data-gcat="{category}"]').click(timeout=9000)
+            actual_count = page.locator("#tn13Gallery .tn22-gallery-tile").count()
+            assert actual_count == expected_count, (
+                f"Mobile gallery category {category!r}: {actual_count} photos instead of {expected_count}"
+            )
+        page.locator("#tn13Gallery .tn22-gallery-back").click(timeout=9000)
     messenger_card = page.locator('#salonDesktopContacts [data-contact-type="messenger"]' if desktop else '#tn13Visit [data-contact-type="messenger"]')
     if not data.get("contacts", {}).get("messengerUrl"):
         assert messenger_card.count() == 1 and messenger_card.is_hidden(), "Missing messenger must not leave a visible contact card"
