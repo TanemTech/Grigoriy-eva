@@ -105,7 +105,7 @@ jobs:
         uses: actions/configure-pages@v5
         with:
           token: ${{ secrets.TANEM_PAGES_TOKEN || github.token }}
-          enablement: true
+          enablement: false
 
       - name: Upload Pages artifact
         if: steps.site_mode.outputs.production == 'true'
