@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
 """Smoke-test a *real* production site (not the Lumen test fixture) in Chromium or WebKit."""
 import argparse
+import json
 import os
 import re
+from pathlib import Path
 
 from playwright.sync_api import sync_playwright
 
@@ -87,31 +89,51 @@ def check(browser, width, height, mobile, language):
     visible = page.locator("body").inner_text()
     assert not re.search(r"SALON NAME|(?:Услуга|Service)\s+\d{2}\b", visible), (
         "Demo labels remain visible on a production page")
-    # Google Maps embed can emit WebKit-only internal errors from its third-party
-    # frame. Keep the filter narrow so TANEM application errors still fail the run.
+    # Third-party map widgets can raise known frame-only errors in local HTTP smoke tests.
+    # Ignore only these exact provider errors; application errors still fail the run.
     google_maps_frame_noise = (
         'Could not load "search_impl".',
         'Could not load "util".',
         'maps.googleapis.com/maps/api/mapsjs/gen_204?csp_test=true due to access control checks.',
     )
-    app_errors = [error for error in errors if not any(token in error for token in google_maps_frame_noise)]
+    app_errors = [
+        error for error in errors
+        if not any(token in error for token in google_maps_frame_noise)
+        and not (
+            HOST.startswith("http://127.0.0.1")
+            and "/yandex.ru" in error
+            and "Protocols must match." in error
+        )
+    ]
     assert not app_errors, f"JavaScript errors: {app_errors}"
     assert not failed_assets, f"Missing site assets: {failed_assets}"
     context.close()
     print(f"PASS {width}x{height}, {'touch' if mobile else 'desktop'}, {language}: customer data, cards and booking")
 
 
+def production_locales():
+    source = Path(__file__).resolve().parents[1] / "site-data.js"
+    content = source.read_text(encoding="utf-8")
+    match = re.search(r"const data=(\{.*?\});\s*const rows=\[\];", content, re.S)
+    assert match, "Could not parse production locales from site-data.js"
+    data = json.loads(match.group(1))
+    locales = data.get("locales", [])
+    assert locales, "Production site must declare at least one locale"
+    return locales
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--engine", choices=["chromium", "webkit"], default="chromium")
     args = parser.parse_args()
+    locales = production_locales()
+    cases = [(1366, 900, False, language) for language in locales]
+    cases += [(390, 844, True, language) for language in locales]
+    cases.append((1180, 820, True, locales[0]))
     with sync_playwright() as playwright:
         browser = getattr(playwright, args.engine).launch(headless=True)
         try:
-            for case in [(1366, 900, False, "ru"), (1366, 900, False, "en"),
-                         (1366, 900, False, "hy"), (390, 844, True, "ru"),
-                         (390, 844, True, "en"), (390, 844, True, "hy"),
-                         (1180, 820, True, "ru")]:
+            for case in cases:
                 check(browser, *case)
         finally:
             browser.close()
