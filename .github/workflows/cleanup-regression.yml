@@ -103,7 +103,7 @@ jobs:
         run: |
           python -m http.server 4176 --bind 127.0.0.1 --directory "$GITHUB_WORKSPACE" > /tmp/salon-client.log 2>&1 &
           sleep 2
-          python tests/client_smoke.py --engine chromium
+          EXPECT_UNLIMITED_GALLERY=1 python tests/client_smoke.py --engine chromium
       - name: Attach screenshot evidence
         if: always()
         uses: actions/upload-artifact@v4
@@ -153,7 +153,7 @@ jobs:
         run: |
           python -m http.server 4176 --bind 127.0.0.1 --directory "$GITHUB_WORKSPACE" > /tmp/salon-client-webkit.log 2>&1 &
           sleep 2
-          python tests/client_smoke.py --engine webkit
+          EXPECT_UNLIMITED_GALLERY=1 python tests/client_smoke.py --engine webkit
       - name: Verify generic client smoke against fixture in WebKit
         run: |
           mkdir -p /tmp/salon-production-webkit
