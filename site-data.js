@@ -6269,7 +6269,8 @@
       "categories": [
         "Косметология"
       ],
-      "work": []
+      "work": [],
+      "reviewIds": []
     },
     {
       "id": "elvira-hairdresser",
@@ -6298,7 +6299,8 @@
       "categories": [
         "Волосы"
       ],
-      "work": []
+      "work": [],
+      "reviewIds": []
     },
     {
       "id": "darya-hairdresser",
@@ -6327,7 +6329,8 @@
       "categories": [
         "Волосы"
       ],
-      "work": []
+      "work": [],
+      "reviewIds": []
     },
     {
       "id": "anna-brow-lash",
@@ -6356,7 +6359,8 @@
       "categories": [
         "Брови и ресницы"
       ],
-      "work": []
+      "work": [],
+      "reviewIds": []
     },
     {
       "id": "marina-manicure",
@@ -6385,7 +6389,8 @@
       "categories": [
         "Маникюр"
       ],
-      "work": []
+      "work": [],
+      "reviewIds": []
     },
     {
       "id": "olesya-manicure",
@@ -6414,7 +6419,8 @@
       "categories": [
         "Маникюр"
       ],
-      "work": []
+      "work": [],
+      "reviewIds": []
     }
   ],
   "reviews": [
