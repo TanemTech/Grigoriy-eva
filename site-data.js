@@ -104,7 +104,7 @@
     },
     "messengerHandle": "",
     "mapUrl": "https://yandex.com/maps/org/yeva/1179517154/?ll=37.961682%2C55.729239&z=15",
-    "mapEmbedUrl": "https://yandex.ru/map-widget/v1/?ll=37.961682%2C55.729239&z=16&pt=37.961682%2C55.729239%2Cpm2rdm",
+    "mapEmbedUrl": "",
     "reviewsUrl": "https://yandex.com/maps/org/yeva/1179517154/",
     "booking": [
       {
