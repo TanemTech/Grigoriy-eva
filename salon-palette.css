@@ -662,16 +662,16 @@ html[data-br-device="desktop"] #salonDesktopTeam .tanem-paged-team .std-master{
 }
 
 /* One catalogue composition on desktop and mobile: title, tariffs, price, details. */
-html[data-br-device] :is(#salonDesktopServices,#tn13Services) .tanem-service-card{
+html[data-br-device] :is(#salon-desktop-v1,#salon-mobile) :is(#salonDesktopServices,#tn13Services) .tanem-service-card{
   position:relative!important;display:grid!important;
   grid-template-columns:minmax(0,1fr) 218px!important;column-gap:32px!important;row-gap:0!important;
   align-items:start!important;width:100%!important;min-width:0!important;
   height:auto!important;min-height:100px!important;padding:23px 27px!important;text-align:left!important;
 }
-html[data-br-device] :is(#salonDesktopServices,#tn13Services) .tanem-service-copy{
+html[data-br-device] :is(#salon-desktop-v1,#salon-mobile) :is(#salonDesktopServices,#tn13Services) .tanem-service-copy{
   grid-column:1;grid-row:1;min-width:0;pointer-events:none;
 }
-html[data-br-device] :is(#salonDesktopServices,#tn13Services) .tanem-service-title{
+html[data-br-device] :is(#salon-desktop-v1,#salon-mobile) :is(#salonDesktopServices,#tn13Services) .tanem-service-title{
   position:static!important;display:block!important;width:auto!important;max-width:none!important;
   margin:0!important;padding:0!important;color:inherit!important;
   font:500 23px/1.2 'Cormorant Garamond',Georgia,serif!important;
@@ -679,52 +679,52 @@ html[data-br-device] :is(#salonDesktopServices,#tn13Services) .tanem-service-tit
   hyphens:none!important;-webkit-hyphens:none!important;-webkit-line-clamp:unset!important;
   overflow:visible!important;text-transform:none!important;letter-spacing:0!important;
 }
-html[data-br-device] :is(#salonDesktopServices,#tn13Services) .tanem-service-tariffs{
+html[data-br-device] :is(#salon-desktop-v1,#salon-mobile) :is(#salonDesktopServices,#tn13Services) .tanem-service-tariffs{
   display:table;width:max-content;max-width:100%;margin:10px 0 0;border-spacing:0 4px;
   color:inherit;font:500 18px/1.25 'Cormorant Garamond',Georgia,serif;
 }
-html[data-br-device] :is(#salonDesktopServices,#tn13Services) .tanem-service-tariffs>div{display:table-row}
-html[data-br-device] :is(#salonDesktopServices,#tn13Services) .tanem-service-tariffs dt,html[data-br-device] :is(#salonDesktopServices,#tn13Services) .tanem-service-tariffs dd{
+html[data-br-device] :is(#salon-desktop-v1,#salon-mobile) :is(#salonDesktopServices,#tn13Services) .tanem-service-tariffs>div{display:table-row}
+html[data-br-device] :is(#salon-desktop-v1,#salon-mobile) :is(#salonDesktopServices,#tn13Services) .tanem-service-tariffs dt,html[data-br-device] :is(#salon-desktop-v1,#salon-mobile) :is(#salonDesktopServices,#tn13Services) .tanem-service-tariffs dd{
   display:table-cell;margin:0;padding:0;vertical-align:baseline;white-space:nowrap;
 }
-html[data-br-device] :is(#salonDesktopServices,#tn13Services) .tanem-service-tariffs dt{padding-right:18px}
-html[data-br-device] :is(#salonDesktopServices,#tn13Services) .tanem-service-tariffs dd{
+html[data-br-device] :is(#salon-desktop-v1,#salon-mobile) :is(#salonDesktopServices,#tn13Services) .tanem-service-tariffs dt{padding-right:18px}
+html[data-br-device] :is(#salon-desktop-v1,#salon-mobile) :is(#salonDesktopServices,#tn13Services) .tanem-service-tariffs dd{
   text-align:right;font:600 13px/1.6 Manrope,Arial,sans-serif;font-variant-numeric:tabular-nums;
 }
-html[data-br-device] :is(#salonDesktopServices,#tn13Services) .tanem-service-side{
+html[data-br-device] :is(#salon-desktop-v1,#salon-mobile) :is(#salonDesktopServices,#tn13Services) .tanem-service-side{
   grid-column:2;grid-row:1;display:flex;align-items:center;justify-content:flex-end;gap:20px;
   align-self:center;min-width:0;pointer-events:none;
 }
-html[data-br-device] :is(#salonDesktopServices,#tn13Services) .tanem-service-price{
+html[data-br-device] :is(#salon-desktop-v1,#salon-mobile) :is(#salonDesktopServices,#tn13Services) .tanem-service-price{
   color:inherit;font:600 17px/1.25 Manrope,Arial,sans-serif;white-space:nowrap;font-variant-numeric:tabular-nums;
 }
-html[data-br-device] :is(#salonDesktopServices,#tn13Services) .tanem-service-duration{
+html[data-br-device] :is(#salon-desktop-v1,#salon-mobile) :is(#salonDesktopServices,#tn13Services) .tanem-service-duration{
   padding:5px 8px;border:1px solid rgba(255,255,255,.18);border-radius:999px;
   font:500 10px/1.2 Manrope,Arial,sans-serif;white-space:nowrap;
 }
-html[data-br-device] :is(#salonDesktopServices,#tn13Services) .tanem-service-description{
+html[data-br-device] :is(#salon-desktop-v1,#salon-mobile) :is(#salonDesktopServices,#tn13Services) .tanem-service-description{
   grid-column:1;min-width:0;margin-top:9px;color:#b9b6b2;
 }
-html[data-br-device] :is(#salonDesktopServices,#tn13Services) .tanem-service-description p{
+html[data-br-device] :is(#salon-desktop-v1,#salon-mobile) :is(#salonDesktopServices,#tn13Services) .tanem-service-description p{
   margin:0;font:400 12px/1.55 Manrope,Arial,sans-serif;
   display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden;
 }
-html[data-br-device] :is(#salonDesktopServices,#tn13Services) .tanem-service-description:is(.is-expanded,.is-measuring) p{
+html[data-br-device] :is(#salon-desktop-v1,#salon-mobile) :is(#salonDesktopServices,#tn13Services) .tanem-service-description:is(.is-expanded,.is-measuring) p{
   display:block;-webkit-line-clamp:unset;overflow:visible;
 }
-html[data-br-device] :is(#salonDesktopServices,#tn13Services) .tanem-service-more{
+html[data-br-device] :is(#salon-desktop-v1,#salon-mobile) :is(#salonDesktopServices,#tn13Services) .tanem-service-more{
   position:relative;z-index:3;display:block;width:max-content;margin:5px 0 0;padding:2px 0;
   border:0;background:none;color:#ddd3cb;font:500 11px/1.4 Manrope,Arial,sans-serif;
   text-decoration:underline;text-underline-offset:3px;cursor:pointer;
 }
-html[data-br-device] :is(#salonDesktopServices,#tn13Services) .tanem-service-book{
+html[data-br-device] :is(#salon-desktop-v1,#salon-mobile) :is(#salonDesktopServices,#tn13Services) .tanem-service-book{
   position:absolute;inset:0;z-index:1;width:100%;height:100%;margin:0;padding:0;
   border:0;border-radius:inherit;background:transparent;cursor:pointer;
 }
-html[data-br-device] :is(#salonDesktopServices,#tn13Services) .tanem-service-book:focus-visible{
+html[data-br-device] :is(#salon-desktop-v1,#salon-mobile) :is(#salonDesktopServices,#tn13Services) .tanem-service-book:focus-visible{
   outline:2px solid #d3c0af;outline-offset:-3px;
 }
-html[data-br-device] :is(#salonDesktopServices,#tn13Services) .tanem-service-description [hidden]{display:none!important}
+html[data-br-device] :is(#salon-desktop-v1,#salon-mobile) :is(#salonDesktopServices,#tn13Services) .tanem-service-description [hidden]{display:none!important}
 
 html[data-br-device="mobile"] #salon-mobile #tn13Services .tanem-service-card{
   grid-template-columns:minmax(0,1fr) 104px!important;column-gap:12px!important;

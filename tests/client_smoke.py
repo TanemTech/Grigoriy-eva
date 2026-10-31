@@ -54,6 +54,14 @@ def check(browser, width, height, mobile, language):
     cards = page.locator("#stdServiceList .dct-service-card" if desktop
                          else "#tn13Services .tn31-service-row")
     assert 0 < cards.count() <= len(data["services"]), "Wrong number of service cards"
+    # Client service titles must wrap at whole words, never through automatic hyphens.
+    if page.locator(".tanem-service-card").count():
+        title_styles = page.locator(".tanem-service-title").evaluate_all("elements => elements.map(e => ({hyphens:getComputedStyle(e).hyphens, wrap:getComputedStyle(e).overflowWrap}))")
+        assert all(style["hyphens"] == "none" and style["wrap"] == "normal" for style in title_styles), title_styles
+        assert page.locator(".tanem-service-card .tanem-service-price").count() == cards.count()
+        if desktop:
+            assert page.locator('#stdServiceTabs [data-service-category="all"]').count() == 0
+
     team_section = page.locator("#salonDesktopTeam" if desktop else "#tn13Team")
     reviews_section = page.locator("#salonDesktopReviews" if desktop else "#tn13Reviews")
     assert not team_section.is_hidden(), "Team is a permanent structural section"
