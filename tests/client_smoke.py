@@ -151,6 +151,9 @@ def check(browser, width, height, mobile, language):
             and "due to access control checks." in error
         )
     ]
+    # The map's optional advertising script is not an application asset.
+    if HOST.startswith("http://127.0.0.1"):
+        app_errors = [error for error in app_errors if error != "Error: Failed to load https://yandex.ru/ads/system/context.js"]
     assert not app_errors, f"JavaScript errors: {app_errors}"
     assert not failed_assets, f"Missing site assets: {failed_assets}"
     context.close()
