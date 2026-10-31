@@ -345,8 +345,229 @@
     if(description)description.setAttribute('content',text(data.salon.heroDescription,lang)||text(data.salon.about,lang));
   }
 
+  function setupDesktopTeamPaging(){
+    const track=document.getElementById('stdTeamTrack');
+    if(!track)return;
+    const cards=[...track.children].filter(card=>card.classList.contains('std-master'));
+    if(cards.length<=4)return;
+    track.classList.add('tanem-paged-team');
+    let page=0;
+    const total=Math.ceil(cards.length/4);
+    const controls=document.createElement('div');
+    controls.className='tanem-team-controls';
+    controls.innerHTML='<button type="button" data-turn="-1" aria-label="Предыдущие мастера">←</button><span aria-live="polite"></span><button type="button" data-turn="1" aria-label="Следующие мастера">→</button>';
+    track.after(controls);
+    const update=()=>{
+      cards.forEach((card,i)=>{
+        card.hidden=Math.floor(i/4)!==page;
+        card.classList.toggle('tanem-team-solo',page===total-1&&cards.length%4===1&&i===cards.length-1);
+      });
+      controls.querySelector('span').textContent=(page+1)+' / '+total;
+    };
+    controls.querySelectorAll('[data-turn]').forEach(button=>button.addEventListener('click',()=>{
+      page=(page+Number(button.dataset.turn)+total)%total;
+      update();
+    }));
+    // Horizontal touch, mouse and trackpad gestures turn the same four-card pages.
+    let pointer=null,suppressClick=false,wheelDelta=0;
+    track.style.touchAction='pan-y';
+    track.addEventListener('pointerdown',event=>{
+      if(event.button!==0)return;
+      pointer={id:event.pointerId,x:event.clientX,y:event.clientY,moved:false};
+    });
+    track.addEventListener('pointermove',event=>{
+      if(!pointer||event.pointerId!==pointer.id)return;
+      if(Math.abs(event.clientX-pointer.x)>12&&Math.abs(event.clientX-pointer.x)>Math.abs(event.clientY-pointer.y))pointer.moved=true;
+    });
+    track.addEventListener('pointerup',event=>{
+      if(!pointer||event.pointerId!==pointer.id)return;
+      const dx=event.clientX-pointer.x,dy=event.clientY-pointer.y;
+      if(pointer.moved&&Math.abs(dx)>55&&Math.abs(dx)>Math.abs(dy)*1.2){
+        page=(page+(dx<0?1:-1)+total)%total;
+        update();
+        suppressClick=true;
+      }
+      pointer=null;
+    });
+    track.addEventListener('pointercancel',()=>{pointer=null});
+    track.addEventListener('click',event=>{
+      if(!suppressClick)return;
+      suppressClick=false;event.preventDefault();event.stopImmediatePropagation();
+    },true);
+    track.addEventListener('wheel',event=>{
+      if(Math.abs(event.deltaX)<=Math.abs(event.deltaY)*1.4||Math.abs(event.deltaX)<3)return;
+      event.preventDefault();
+      wheelDelta+=event.deltaX;
+      if(Math.abs(wheelDelta)>65){page=(page+(wheelDelta>0?1:-1)+total)%total;update();wheelDelta=0}
+    },{passive:false});
+    update();
+  }
+
+  function setupMasterProfiles(){
+    const desktop=window.__BR_DESKTOP_DEVICE__===true;
+    const overlay=document.querySelector(desktop?'#stdMasterOverlay':'.tn22-master-page');
+    if(!overlay)return;
+    let selectedId='';
+    let historyEntryOpen=false;
+    const historyKey='tanemMasterProfile';
+    const tabs=['about','services','portfolio','reviews'];
+    const copy={
+      ru:{about:'О мастере',services:'Услуги',portfolio:'Портфолио',reviews:'Отзывы',book:'Записаться',more:'Показать весь прайс',less:'Свернуть прайс',emptyServices:'Услуги уточняются в салоне.',emptyPortfolio:'Фотографии по этому направлению пока не добавлены.',portfolioNote:'Примеры работ студии по направлению мастера',emptyReviews:'Персональные отзывы пока не добавлены.',source:'Источник: Sonline',view:'Открыть профиль в Sonline',none:'Длительность уточняется'},
+      en:{about:'About',services:'Services',portfolio:'Portfolio',reviews:'Reviews',book:'Book',more:'Show full price list',less:'Collapse price list',emptyServices:'Check services with the salon.',emptyPortfolio:'Studio gallery photos for this specialty are not available yet.',portfolioNote:'Studio work examples in this specialty',emptyReviews:'Individual reviews are not available yet.',source:'Source: Sonline',view:'Open Sonline profile',none:'Duration on request'}
+    };
+    function biography(master,lang){return text(master.about,lang)}
+    function serviceMarkup(service,lang){
+      const name=text(service.title,lang);
+      const duration=text(service.duration,lang);
+      const parts={name,note:''};
+      const price=window.TANEM_SERVICES.normalizePrice(text(service.price,lang));
+      return '<button class="tanem-master-service" type="button" data-master-book>'+
+        '<span class="tanem-master-service-copy"><strong>'+esc(parts.name)+'</strong>'+
+        (parts.note?'<small>'+esc(parts.note)+'</small>':'')+'</span>'+
+        '<span class="tanem-master-service-side">'+(duration?'<small>'+esc(window.TANEM_SERVICES.duration(duration,lang))+'</small>':'')+
+        '<strong>'+esc(price||copy[lang].book)+'</strong></span></button>';
+    }
+    function masterGallery(master){
+      const groups=(master.categories||[]).map(category=>category==='Маникюр'||category==='Педикюр'?'Ногти':category);
+      const gallery=groups.flatMap(category=>(data.media?.gallery?.[category]||[]).map(item=>({...item,category})));
+      if(master.work?.length){
+        const all=Object.values(data.media?.gallery||{}).flat();
+        return master.work.map(item=>typeof item==='string'?(all.find(photo=>photo.src===item)||{src:item,alt:master.name}):item);
+      }
+      return gallery;
+    }
+    function profileReviews(master,lang){
+      const ids=new Set(master.reviewIds||[]);
+      return (data.reviews||[]).filter(review=>ids.has(review.id)&&text(review.text,lang)).slice(0,9);
+    }
+    function reviewMarkup(review,lang){
+      const name=text(review.author,lang);
+      const rating=Number(review.rating);
+      const stars=Number.isInteger(rating)&&rating>=1&&rating<=5?'★'.repeat(rating):'';
+      return '<article class="tanem-master-review '+(desktop?'std-review-card':'tn30-review-card')+'">'+
+        '<div class="'+(desktop?'std-review-head':'tn30-review-head')+'"><span class="'+(desktop?'std-review-avatar':'tn30-review-avatar')+'">'+esc([...String(name)][0]||'S')+'</span><span><strong class="'+(desktop?'std-review-name':'tn30-review-name')+'">'+esc(name)+'</strong><span class="'+(desktop?'std-review-meta':'tn30-review-meta')+'">'+esc(text(review.source,lang))+'</span>'+(stars?'<span class="tanem-master-stars">'+stars+'</span>':'')+'</span></div>'+
+        '<p class="'+(desktop?'std-review-text':'')+'">'+esc(text(review.text,lang))+'</p></article>';
+    }
+    function render(master){
+      const lang=currentLang()==='en'?'en':'ru',words=copy[lang];
+      const target=overlay.querySelector(desktop?'#stdMasterPageContent':'.tn22-master-body');
+      if(!target)return;
+      const items=(data.services||[]).filter(item=>master.serviceIds?.length?master.serviceIds.includes(item.id):(master.categories||[]).includes(item.category));
+      const works=masterGallery(master);
+      const reviews=profileReviews(master,lang);
+      const name=text(master.name,lang),role=text(master.role,lang),avatar=typeof master.photo==='string'?master.photo:master.photo?.src;
+      const profileUrl=/^https:\/\/widget\.sonline\.su\//.test(master.bookingUrl||'')?master.bookingUrl:'';
+      const sections=[
+        '<section class="tanem-master-section" id="tanem-master-about"><h3>'+esc(words.about)+'</h3><p class="tanem-master-bio">'+esc(biography(master,lang))+'</p></section>',
+        '<section class="tanem-master-section" id="tanem-master-services"><h3>'+esc(words.services)+'</h3>'+
+          (items.length?'<div class="tanem-master-price-list">'+items.slice(0,6).map(item=>serviceMarkup(item,lang)).join('')+
+            (items.length>6?'<div class="tanem-master-extra" hidden>'+items.slice(6).map(item=>serviceMarkup(item,lang)).join('')+'</div>':'')+'</div>':
+            '<p class="tanem-master-empty">'+esc(words.emptyServices)+'</p>')+
+          (items.length>6?'<button class="tanem-master-more" type="button" aria-expanded="false" data-master-expand>'+esc(words.more)+' <span>↓</span></button>':'')+'</section>',
+        '<section class="tanem-master-section" id="tanem-master-portfolio"><h3>'+esc(words.portfolio)+'</h3>'+
+          (works.length?'<p class="tanem-master-gallery-note">'+esc(words.portfolioNote)+'</p><div class="tanem-master-gallery">'+works.map((item,i)=>'<button type="button" data-master-work="'+i+'" aria-label="'+esc(lang==='en'?'View photo':'Посмотреть фотографию')+'"><img src="'+esc(item.src)+'" alt="'+esc(text(item.alt,lang))+'" loading="lazy"></button>').join('')+'</div>':
+            '<p class="tanem-master-empty">'+esc(words.emptyPortfolio)+'</p>')+'</section>',
+        '<section class="tanem-master-section" id="tanem-master-reviews"><h3>'+esc(words.reviews)+'</h3>'+
+          (reviews.length?'<div class="tanem-master-review-window"><div class="tanem-master-review-track">'+reviews.concat(reviews).map(review=>reviewMarkup(review,lang)).join('')+'</div></div>':
+            '<p class="tanem-master-empty">'+esc(words.emptyReviews)+'</p>')+
+          (profileUrl?'<a class="tanem-master-source-link" href="'+esc(profileUrl)+'" target="_blank" rel="noopener noreferrer">'+esc(words.view)+' ↗</a>':'')+'</section>'
+      ];
+      target.innerHTML='<div class="tanem-master-head"><div class="tanem-master-photo">'+(avatar?'<img src="'+esc(avatar)+'" alt="'+esc(name)+'">':'')+'</div><h2>'+esc(name)+'</h2><p>'+esc(role)+'</p></div><div class="tanem-master-sections">'+sections.join('')+'</div>';
+      const existing=overlay.querySelector('.tanem-master-jump');
+      if(existing)existing.remove();
+      const nav=document.createElement('nav');nav.className='tanem-master-jump '+(desktop?'std-master-tabs':'tn22-master-tabs');nav.setAttribute('aria-label',lang==='en'?'Specialist sections':'Разделы профиля');
+      nav.innerHTML=tabs.map((key,i)=>'<button type="button" data-jump="'+key+'" class="'+(i===0?'active':'')+'">'+esc(words[key])+'</button>').join('');
+      target.querySelector('.tanem-master-head').after(nav);
+      const updateNav=()=>{
+        const sections=[...target.querySelectorAll('.tanem-master-section')];
+        const stickyBottom=nav.getBoundingClientRect().bottom;
+        const active=[...sections].reverse().find(section=>section.getBoundingClientRect().top<=stickyBottom+52)||sections[0];
+        nav.querySelectorAll('[data-jump]').forEach((button,i)=>button.classList.toggle('active',active===sections[i]));
+      };
+      overlay.__tanemMasterUpdate=updateNav;
+      nav.querySelectorAll('[data-jump]').forEach(button=>button.addEventListener('click',()=>{
+        const section=target.querySelector('#tanem-master-'+button.dataset.jump);
+        if(!section)return;
+        const position=overlay.scrollTop+section.getBoundingClientRect().top-overlay.getBoundingClientRect().top-nav.offsetHeight-32;
+        overlay.scrollTo({top:position,behavior:window.matchMedia('(prefers-reduced-motion: reduce)').matches?'instant':'smooth'});
+      }));
+      target.querySelector('[data-master-expand]')?.addEventListener('click',event=>{
+        const button=event.currentTarget,expanded=button.getAttribute('aria-expanded')==='true';
+        button.setAttribute('aria-expanded',String(!expanded));
+        target.querySelector('.tanem-master-extra').hidden=expanded;
+        button.innerHTML=esc(expanded?words.more:words.less)+' <span>'+(expanded?'↓':'↑')+'</span>';
+      });
+      target.querySelectorAll('[data-master-work]').forEach(button=>button.addEventListener('click',()=>{
+        document.dispatchEvent(new CustomEvent('tanem:open-master-gallery',{detail:{items:works.map(item=>({src:item.src,alt:text(item.alt,lang)})),index:Number(button.dataset.masterWork)||0,category:works[Number(button.dataset.masterWork)||0]?.category||'Салон'}}));
+      }));
+      const track=target.querySelector('.tanem-master-review-track');
+      if(track)startMasterReviews(track,overlay);
+      const book=overlay.querySelector(desktop?'#stdMasterPageBook':'.tn22-master-book');
+      if(book)book.textContent=lang==='en'?'Book':'Записаться';
+      updateNav();
+    }
+    function startMasterReviews(track,container){
+      if(window.matchMedia('(prefers-reduced-motion: reduce)').matches)return;
+      let offset=0,last=0,dragX=0,dragging=false;
+      const move=timestamp=>{
+        if(!track.isConnected||!container.classList.contains('open'))return;
+        const width=track.scrollWidth/2;
+        if(!dragging&&last&&width)offset-=Math.min((timestamp-last)*.024,1.8);
+        if(width){offset=((offset%width)-width)%width;track.style.transform='translate3d('+offset+'px,0,0)'}
+        last=timestamp;requestAnimationFrame(move);
+      };
+      track.addEventListener('pointerdown',event=>{dragging=true;dragX=event.clientX;track.setPointerCapture(event.pointerId)});
+      track.addEventListener('pointermove',event=>{if(!dragging)return;offset+=event.clientX-dragX;dragX=event.clientX});
+      ['pointerup','pointercancel','lostpointercapture'].forEach(type=>track.addEventListener(type,()=>{dragging=false}));
+      requestAnimationFrame(move);
+    }
+    // Profile service rows AND its persistent booking CTA use one familiar chooser.
+    overlay.addEventListener('click',event=>{
+      if(!event.target.closest('[data-master-book],#stdMasterPageBook,.tn22-master-book'))return;
+      event.preventDefault();event.stopImmediatePropagation();
+      overlay.querySelector(desktop?'#stdMasterPageClose':'.tn22-back')?.click();
+      if(desktop)document.getElementById('stdHeaderBookBtn')?.click();
+      else document.querySelector('#tn13Top .tn22-cta')?.click();
+    },true);
+    document.addEventListener('click',event=>{
+      const trigger=event.target.closest('[data-desktop-master],[data-mid],[data-sheet-mid]');
+      if(trigger)selectedId=trigger.dataset.desktopMaster||trigger.dataset.mid||trigger.dataset.sheetMid||'';
+    },true);
+    new MutationObserver(()=>{
+      if(!overlay.classList.contains('open')){
+        if(historyEntryOpen&&history.state?.[historyKey])history.back();
+        historyEntryOpen=false;
+        return;
+      }
+      const fallbackName=overlay.querySelector(desktop?'.std-master-profile h2':'.tn22-profile h1')?.textContent;
+      const master=(data.team||[]).find(item=>item.id===selectedId)||
+        (data.team||[]).find(item=>text(item.name,'ru')===fallbackName);
+      if(master){
+        render(master);
+        if(!historyEntryOpen){
+          history.pushState({...history.state,[historyKey]:master.id},'');
+          historyEntryOpen=true;
+        }
+      }
+    }).observe(overlay,{attributes:true,attributeFilter:['class']});
+    window.addEventListener('popstate',()=>{
+      if(!overlay.classList.contains('open'))return;
+      if(history.state?.[historyKey])return;
+      historyEntryOpen=false;
+      overlay.querySelector(desktop?'#stdMasterPageClose':'.tn22-back')?.click();
+    });
+    overlay.addEventListener('scroll',()=>overlay.__tanemMasterUpdate?.(),{passive:true});
+    window.addEventListener('salon-template:languagechange',()=>{
+      if(!overlay.classList.contains('open'))return;
+      const master=(data.team||[]).find(item=>item.id===selectedId);
+      if(master)requestAnimationFrame(()=>render(master));
+    });
+  }
+
   window.addEventListener('salon-template:languagechange',apply);
   apply();
+  setupDesktopTeamPaging();
+  setupMasterProfiles();
   [80,260,700].forEach(delay=>window.setTimeout(apply,delay));
   window.setInterval(()=>applySchedule(currentLang()),60000);
 })();

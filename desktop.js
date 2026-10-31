@@ -35,7 +35,7 @@
         russian(variant.price)
       ]);
       const tuple=[russian(service.title),russian(service.price),russian(service.duration),variants,russian(service.description)];
-      if(service.id==='mens-cut-long'||service.id==='mens-cut-color')tuple.push(service.id);
+      tuple.push(service.id);
       return tuple;
     })
   ]));
@@ -504,6 +504,10 @@
     gallery.classList.add('open');
     document.body.style.overflow='hidden';
   }
+  document.addEventListener('tanem:open-master-gallery',event=>{
+    const {items,index}=event.detail||{};
+    if(Array.isArray(items)&&items.length)openDesktopViewer(items,index||0,'master');
+  });
   function closeDesktopViewer(){
     gallery.classList.remove('open');
     resetDesktopViewer();
@@ -657,7 +661,7 @@
   });
 
   const SERVICE_PREVIEW_LIMIT=8;
-  let activeServiceCategory='Все';
+  let activeServiceCategory=SERVICE_CATEGORIES[0]||'';
   let desktopServicesExpanded=false;
   let desktopServiceLanguageReady=false;
   const serviceTabs=document.getElementById('stdServiceTabs');
@@ -665,7 +669,7 @@
   const serviceMore=document.getElementById('stdServiceMore');
   const serviceMoreText=document.getElementById('stdServiceMoreText');
   const serviceMoreTextMobile=document.getElementById('stdServiceMoreTextMobile');
-  const DESKTOP_SERVICE_TABS=['Все',...SERVICE_CATEGORIES];
+  const DESKTOP_SERVICE_TABS=[...SERVICE_CATEGORIES];
 
   function desktopServiceWord(n){
     const n10=n%10,n100=n%100;
@@ -687,6 +691,11 @@
     return '<span class="dct-money-prefix">'+(m[1]||'')+'</span>'+
       '<span class="dct-money-amount">'+m[2].trim()+'</span>'+
       '<span class="dct-money-symbol">'+m[3]+'</span>';
+  }
+
+  function clientServiceCard(item){
+    const service=SITE.services.find(service=>service.id===item[5]);
+    return SITE.mode==='production'&&service?window.TANEM_SERVICES.render(service,'desktop'):templateServiceCard(item);
   }
 
   function templateServiceCard(item){
@@ -799,7 +808,7 @@
       const heading=activeServiceCategory==='Все'
         ? '<div class="dct-service-category-heading"><span>'+group.label+'</span><i aria-hidden="true"></i></div>'
         : '';
-      return '<section class="dct-service-category">'+heading+'<div class="dct-service-category-list">'+group.services.map(templateServiceCard).join('')+'</div></section>';
+      return '<section class="dct-service-category">'+heading+'<div class="dct-service-category-list">'+group.services.map(clientServiceCard).join('')+'</div></section>';
     }).join('');
 
     bindDesktopServiceControls(serviceList);
@@ -825,6 +834,7 @@
   }
 
   function bindDesktopServiceControls(scope){
+    window.TANEM_SERVICES.enhance(scope);
     scope.querySelectorAll('[data-service-book]').forEach(btn=>btn.onclick=openDesktopBooking);
     scope.querySelectorAll('[data-service-details]').forEach(btn=>btn.onclick=()=>{
       const card=btn.closest('.is-demo-expandable');
@@ -910,7 +920,7 @@
       shown-=already;
       const extra=group.services.slice(already);
       if(!extra.length)return;
-      const cards=extra.map(templateServiceCard).join('');
+      const cards=extra.map(clientServiceCard).join('');
       if(already){
         sections.push('<div class="dct-service-category-list dct-service-extra-cards">'+cards+'</div>');
       }else{

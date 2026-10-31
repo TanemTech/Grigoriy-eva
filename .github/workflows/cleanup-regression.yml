@@ -53,6 +53,7 @@ jobs:
           fi
           node tests/validate-site-data.cjs tests/fixtures/site-data.production.js --production
           node tests/check-factory-contract.cjs
+          node tests/check-client-services.cjs
 
   visual-regression:
     needs: compare-to-approved-template

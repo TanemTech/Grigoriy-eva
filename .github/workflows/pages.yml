@@ -74,6 +74,7 @@ jobs:
             mobile.js
             salon-palette.css
             site-data.js
+            site-services.js
             site-regions.js
             site-runtime.js
             favicon-source.png
