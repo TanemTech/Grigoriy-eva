@@ -55,6 +55,13 @@ def check_master_navigation(page, desktop):
     page.go_forward()
     expect(profile).to_have_class(open_class)
     profile.locator('.tanem-master-head').wait_for(state='visible')
+    # WebKit can briefly show the restored profile before a stale observer
+    # triggers a second Back. Wait beyond the close animation to catch it.
+    page.wait_for_timeout(700)
+    expect(profile).to_have_class(open_class)
+    assert page.evaluate('history.state?.tanemMasterProfile'), (
+        'Restoring a master profile must retain its browser-history entry'
+    )
     close_button.click()
     expect(profile).not_to_have_class(open_class)
 
