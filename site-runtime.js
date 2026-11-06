@@ -410,6 +410,7 @@
     let selectedId='';
     let renderedMasterId='',renderedLang='';
     let historyEntryOpen=false;
+    let restoringHistoryProfile=false;
     const historyKey='tanemMasterProfile';
     const profileCloseSelector=desktop?'#stdMasterPageClose':'.tn22-back';
     const nestedCloseSelectors=desktop?[
@@ -579,10 +580,14 @@
     },true);
     new MutationObserver(()=>{
       if(!overlay.classList.contains('open')){
+        // Reopening from browser Forward may remove .closing before the next
+        // animation frame adds .open. That intermediate state is not a close.
+        if(restoringHistoryProfile)return;
         if(historyEntryOpen&&history.state?.[historyKey])history.back();
         historyEntryOpen=false;
         return;
       }
+      restoringHistoryProfile=false;
       const fallbackName=overlay.querySelector(desktop?'.std-master-profile h2':'.tn22-profile h1')?.textContent;
       const master=(data.team||[]).find(item=>item.id===selectedId)||
         (data.team||[]).find(item=>text(item.name,'ru')===fallbackName);
@@ -605,10 +610,14 @@
         else{
           const trigger=[...document.querySelectorAll('[data-desktop-master],[data-mid]')]
             .find(button=>(button.dataset.desktopMaster||button.dataset.mid)===masterId);
-          trigger?.click();
+          if(trigger){
+            restoringHistoryProfile=true;
+            trigger.click();
+          }
         }
         return;
       }
+      restoringHistoryProfile=false;
       if(!overlay.classList.contains('open'))return;
       nestedCloseSelectors.forEach(selector=>document.querySelector(selector)?.click());
       overlay.querySelector(profileCloseSelector)?.click();

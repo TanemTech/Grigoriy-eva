@@ -796,7 +796,7 @@ html[data-br-device] :is(#salon-desktop-v1,#salon-mobile) .tanem-master-price-li
 html[data-br-device] :is(#salon-desktop-v1,#salon-mobile) .tanem-master-price-list .tanem-service-description{color:#756d66}
 html[data-br-device] :is(#salon-desktop-v1,#salon-mobile) .tanem-master-price-list :is(.tanem-service-more,.tanem-service-options summary){color:#6f6258}
 html[data-br-device="mobile"] #salon-mobile .tanem-master-price-list .tanem-service-card{border-radius:11px}
-:is(#stdMasterOverlay,.tn22-master-page) #tanem-master-services{border-top:0}
+:is(#stdMasterOverlay,.tn22-master-page) :is(#tanem-master-services,#tanem-master-portfolio){border-top:0}
 :is(#stdMasterOverlay,.tn22-master-page) .tanem-master-section:last-child{padding-bottom:0}
 html[data-br-device="mobile"] #salon-mobile .tn22-master-page .tn22-master-shell{padding-bottom:calc(76px + max(14px,env(safe-area-inset-bottom)))}
 html[data-br-device="desktop"] #stdMasterOverlay .std-master-page-panel{padding-bottom:104px!important}
