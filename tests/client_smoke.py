@@ -188,9 +188,14 @@ def check(browser, width, height, mobile, language):
         'Could not load "util".',
         'maps.googleapis.com/maps/api/mapsjs/gen_204?csp_test=true due to access control checks.',
     )
+    yandex_map_frame_noise = (
+        'TypeError: undefined is not an object (evaluating '
+        '\'window.document.getElementsByClassName("config-view")[0].textContent\')'
+    )
     app_errors = [
         error for error in errors
         if not any(token in error for token in google_maps_frame_noise)
+        and not (HOST.startswith("http://127.0.0.1") and error == yandex_map_frame_noise)
         and not (
             HOST.startswith("http://127.0.0.1")
             and "/yandex.ru" in error
