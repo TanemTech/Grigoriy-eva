@@ -1014,6 +1014,12 @@
         };
       }
     }
+    if(duration)window.setTimeout(()=>{
+      if(anchorToken!==desktopMoreAnchorRun)return;
+      if(desktopServicesExpanded&&desktopMoreWrap)desktopMoreWrap.style.height='auto';
+      else if(desktopMoreWrap){desktopMoreWrap.remove();desktopMoreWrap=null;stabilizeDesktopMoreButton(anchorTop)}
+      unlockServiceScrollAnchor();
+    },duration+80);
   };
   renderDesktopServices();
 

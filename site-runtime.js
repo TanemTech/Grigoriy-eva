@@ -408,6 +408,7 @@
     const overlay=document.querySelector(desktop?'#stdMasterOverlay':'.tn22-master-page');
     if(!overlay)return;
     let selectedId='';
+    let renderedMasterId='',renderedLang='';
     let historyEntryOpen=false;
     const historyKey='tanemMasterProfile';
     const tabs=['about','services','portfolio','reviews'];
@@ -416,8 +417,8 @@
       en:{about:'About',services:'Services',portfolio:'Portfolio',reviews:'Reviews',book:'Book',more:'Show full price list',less:'Collapse price list',emptyServices:'Check services with the salon.',emptyPortfolio:'Studio gallery photos for this specialty are not available yet.',portfolioNote:'Studio work examples in this specialty',emptyReviews:'Individual reviews are not available yet.',source:'Source: Sonline',view:'Open Sonline profile',none:'Duration on request'}
     };
     function biography(master,lang){return text(master.about,lang)}
-    function serviceMarkup(service,lang){
-      return window.TANEM_SERVICES.render({...service,profileId:'master'},desktop?'desktop':'mobile',lang);
+    function serviceMarkup(service,lang,masterId){
+      return window.TANEM_SERVICES.render({...service,profileId:masterId},desktop?'desktop':'mobile',lang);
     }
     function masterGallery(master){
       const groups=(master.categories||[]).map(category=>category==='Маникюр'||category==='Педикюр'?'Ногти':category);
@@ -432,35 +433,43 @@
       const ids=new Set(master.reviewIds||[]);
       return (data.reviews||[]).filter(review=>ids.has(review.id)&&text(review.text,lang)).slice(0,9);
     }
-    function reviewMarkup(review,lang){
+    function reviewMarkup(review,lang,duplicate=false){
       const name=text(review.author,lang);
       const rating=Number(review.rating);
       const stars=Number.isInteger(rating)&&rating>=1&&rating<=5?'★'.repeat(rating):'';
-      return '<article class="tanem-master-review '+(desktop?'std-review-card':'tn30-review-card')+'">'+
+      return '<article class="tanem-master-review '+(desktop?'std-review-card':'tn30-review-card')+'"'+(duplicate?' data-review-duplicate aria-hidden="true"':'')+'>'+
         '<div class="'+(desktop?'std-review-head':'tn30-review-head')+'"><span class="'+(desktop?'std-review-avatar':'tn30-review-avatar')+'">'+esc([...String(name)][0]||'S')+'</span><span><strong class="'+(desktop?'std-review-name':'tn30-review-name')+'">'+esc(name)+'</strong><span class="'+(desktop?'std-review-meta':'tn30-review-meta')+'">'+esc(text(review.source,lang))+'</span>'+(stars?'<span class="tanem-master-stars">'+stars+'</span>':'')+'</span></div>'+
-        '<p class="'+(desktop?'std-review-text':'')+'">'+esc(text(review.text,lang))+'</p></article>';
+        '<p class="'+(desktop?'std-review-text':'')+'">'+esc(text(review.text,lang))+'</p>'+
+        '<button class="tanem-master-review-more" type="button" aria-expanded="false"'+(duplicate?' tabindex="-1"':'')+' hidden>'+esc(lang==='en'?'Read full review':'Читать полностью')+'</button></article>';
     }
     function render(master){
       const lang=currentLang()==='en'?'en':'ru',words=copy[lang];
       const target=overlay.querySelector(desktop?'#stdMasterPageContent':'.tn22-master-body');
       if(!target)return;
+      const sameMaster=renderedMasterId===master.id;
+      const servicesExpanded=sameMaster&&target.querySelector('[data-master-expand]')?.getAttribute('aria-expanded')==='true';
+      const openOptions=new Set(sameMaster?[...target.querySelectorAll('.tanem-service-options[open]')].map(node=>node.closest('[data-eva-service-id]').dataset.evaServiceId):[]);
+      renderedMasterId=master.id;renderedLang=lang;
       const items=(data.services||[]).filter(item=>master.serviceIds?.length?master.serviceIds.includes(item.id):(master.categories||[]).includes(item.category));
       const works=masterGallery(master);
       const reviews=profileReviews(master,lang);
       const name=text(master.name,lang),role=text(master.role,lang),avatar=typeof master.photo==='string'?master.photo:master.photo?.src;
+      const genitives={'Юлия':'Юлии','Эльвира':'Эльвиры','Дарья':'Дарьи','Анна':'Анны','Марина':'Марины','Олеся':'Олеси'};
+      const moreLabel=lang==='en'?'Show all services by '+name:'Показать все услуги '+(genitives[name]||name);
+      const lessLabel=lang==='en'?'Collapse services':'Свернуть услуги';
       const profileUrl=/^https:\/\/widget\.sonline\.su\//.test(master.bookingUrl||'')?master.bookingUrl:'';
       const sections=[
         '<section class="tanem-master-section" id="tanem-master-about"><h3>'+esc(words.about)+'</h3><p class="tanem-master-bio">'+esc(biography(master,lang))+'</p></section>',
         '<section class="tanem-master-section" id="tanem-master-services"><h3>'+esc(words.services)+'</h3>'+
-          (items.length?'<div class="tanem-master-price-list">'+items.slice(0,6).map(item=>serviceMarkup(item,lang)).join('')+
-            (items.length>6?'<div class="tanem-master-extra" hidden>'+items.slice(6).map(item=>serviceMarkup(item,lang)).join('')+'</div>':'')+'</div>':
+          (items.length?'<div class="tanem-master-price-list">'+items.slice(0,6).map(item=>serviceMarkup(item,lang,master.id)).join('')+
+            (items.length>6?'<div class="tanem-master-extra"'+(servicesExpanded?'':' hidden')+'>'+(servicesExpanded?items.slice(6).map(item=>serviceMarkup(item,lang,master.id)).join(''):'')+'</div>':'')+'</div>':
             '<p class="tanem-master-empty">'+esc(words.emptyServices)+'</p>')+
-          (items.length>6?'<button class="tanem-master-more" type="button" aria-expanded="false" data-master-expand>'+esc(words.more)+' <span>↓</span></button>':'')+'</section>',
+          (items.length>6?'<button class="tanem-master-more" type="button" aria-expanded="'+String(!!servicesExpanded)+'" data-master-expand>'+esc(servicesExpanded?lessLabel:moreLabel)+' <span>'+(servicesExpanded?'↑':'↓')+'</span></button>':'')+'</section>',
         '<section class="tanem-master-section" id="tanem-master-portfolio"><h3>'+esc(words.portfolio)+'</h3>'+
-          (works.length?'<p class="tanem-master-gallery-note">'+esc(words.portfolioNote)+'</p><div class="tanem-master-gallery">'+works.map((item,i)=>'<button type="button" data-master-work="'+i+'" aria-label="'+esc(lang==='en'?'View photo':'Посмотреть фотографию')+'"><img src="'+esc(item.src)+'" alt="'+esc(text(item.alt,lang))+'" loading="lazy"></button>').join('')+'</div>':
+          (works.length?'<p class="tanem-master-gallery-note">'+esc(words.portfolioNote)+'</p><div class="tanem-master-gallery'+(works.length<=2||works.length===4?' is-paired':'')+'">'+works.map((item,i)=>'<button type="button" data-master-work="'+i+'" aria-label="'+esc(lang==='en'?'View photo':'Посмотреть фотографию')+'"><img src="'+esc(item.src)+'" alt="'+esc(text(item.alt,lang))+'" loading="lazy"></button>').join('')+'</div>':
             '<p class="tanem-master-empty">'+esc(words.emptyPortfolio)+'</p>')+'</section>',
         '<section class="tanem-master-section" id="tanem-master-reviews"><h3>'+esc(words.reviews)+'</h3>'+
-          (reviews.length?'<div class="tanem-master-review-window"><div class="tanem-master-review-track">'+reviews.concat(reviews).map(review=>reviewMarkup(review,lang)).join('')+'</div></div>':
+          (reviews.length?'<div class="tanem-master-review-window"><div class="tanem-master-review-track">'+reviews.map(review=>reviewMarkup(review,lang)).join('')+reviews.map(review=>reviewMarkup(review,lang,true)).join('')+'</div></div>':
             '<p class="tanem-master-empty">'+esc(words.emptyReviews)+'</p>')+
           (profileUrl?'<a class="tanem-master-source-link" href="'+esc(profileUrl)+'" target="_blank" rel="noopener noreferrer">'+esc(words.view)+' ↗</a>':'')+'</section>'
       ];
@@ -473,7 +482,8 @@
       const updateNav=()=>{
         const sections=[...target.querySelectorAll('.tanem-master-section')];
         const stickyBottom=nav.getBoundingClientRect().bottom;
-        const active=[...sections].reverse().find(section=>section.getBoundingClientRect().top<=stickyBottom+52)||sections[0];
+        const atBottom=overlay.scrollTop>0&&overlay.scrollTop+overlay.clientHeight>=overlay.scrollHeight-3;
+        const active=atBottom?sections[sections.length-1]:[...sections].reverse().find(section=>section.getBoundingClientRect().top<=stickyBottom+52)||sections[0];
         nav.querySelectorAll('[data-jump]').forEach((button,i)=>button.classList.toggle('active',active===sections[i]));
       };
       overlay.__tanemMasterUpdate=updateNav;
@@ -486,33 +496,62 @@
       target.querySelector('[data-master-expand]')?.addEventListener('click',event=>{
         const button=event.currentTarget,expanded=button.getAttribute('aria-expanded')==='true';
         button.setAttribute('aria-expanded',String(!expanded));
-        target.querySelector('.tanem-master-extra').hidden=expanded;
-        button.innerHTML=esc(expanded?words.more:words.less)+' <span>'+(expanded?'↓':'↑')+'</span>';
+        const extra=target.querySelector('.tanem-master-extra');
+        if(!expanded&&!extra.childElementCount){
+          extra.innerHTML=items.slice(6).map(item=>serviceMarkup(item,lang,master.id)).join('');
+          window.TANEM_SERVICES.enhance(extra);
+        }
+        extra.hidden=expanded;
+        button.innerHTML=esc(expanded?moreLabel:lessLabel)+' <span>'+(expanded?'↓':'↑')+'</span>';
+        updateNav();
       });
       target.querySelectorAll('[data-master-work]').forEach(button=>button.addEventListener('click',()=>{
         document.dispatchEvent(new CustomEvent('tanem:open-master-gallery',{detail:{items:works.map(item=>({src:item.src,alt:text(item.alt,lang)})),index:Number(button.dataset.masterWork)||0,category:works[Number(button.dataset.masterWork)||0]?.category||'Салон'}}));
       }));
       const track=target.querySelector('.tanem-master-review-track');
       if(track)startMasterReviews(track,overlay);
+      target.querySelectorAll('.tanem-master-review').forEach(card=>{
+        const paragraph=card.querySelector('p'),button=card.querySelector('.tanem-master-review-more');
+        button.hidden=paragraph.scrollHeight<=paragraph.clientHeight+1;
+        button.addEventListener('click',()=>{
+          const expanded=card.classList.toggle('is-expanded');
+          button.setAttribute('aria-expanded',String(expanded));
+          button.textContent=lang==='en'?(expanded?'Collapse':'Read full review'):(expanded?'Свернуть':'Читать полностью');
+          updateNav();
+        });
+      });
       const book=overlay.querySelector(desktop?'#stdMasterPageBook':'.tn22-master-book');
       if(book){
         const names={'Юлия':'Юлии','Эльвира':'Эльвире','Дарья':'Дарье','Анна':'Анне','Марина':'Марине','Олеся':'Олесе'};
         book.textContent=lang==='en'?'Book with '+name:'Записаться к '+(names[name]||name);
       }
       window.TANEM_SERVICES.enhance(target);
+      target.querySelectorAll('[data-eva-service-id]').forEach(card=>{
+        const options=card.querySelector('.tanem-service-options');
+        if(options)options.open=openOptions.has(card.dataset.evaServiceId);
+      });
       updateNav();
     }
     function startMasterReviews(track,container){
-      if(window.matchMedia('(prefers-reduced-motion: reduce)').matches)return;
+      const viewport=track.parentElement;
+      const originals=[...track.querySelectorAll('.tanem-master-review:not([data-review-duplicate])')];
+      const contentWidth=originals.reduce((sum,card)=>sum+card.getBoundingClientRect().width,0)+Math.max(0,originals.length-1)*14;
+      const staticReviews=contentWidth<=viewport.clientWidth||window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      viewport.classList.toggle('is-static',staticReviews);
+      if(staticReviews)return;
       let offset=0,last=0,dragX=0,dragging=false;
+      const width=track.scrollWidth/2;
       const move=timestamp=>{
         if(!track.isConnected||!container.classList.contains('open'))return;
-        const width=track.scrollWidth/2;
-        if(!dragging&&last&&width)offset-=Math.min((timestamp-last)*.024,1.8);
+        const paused=track.matches(':hover,:focus-within')||track.querySelector('.is-expanded');
+        if(!paused&&!dragging&&last&&width)offset-=Math.min((timestamp-last)*.024,1.8);
         if(width){offset=((offset%width)-width)%width;track.style.transform='translate3d('+offset+'px,0,0)'}
         last=timestamp;requestAnimationFrame(move);
       };
-      track.addEventListener('pointerdown',event=>{dragging=true;dragX=event.clientX;track.setPointerCapture(event.pointerId)});
+      track.addEventListener('pointerdown',event=>{
+        if(event.target.closest('button,a'))return;
+        dragging=true;dragX=event.clientX;track.setPointerCapture(event.pointerId);
+      });
       track.addEventListener('pointermove',event=>{if(!dragging)return;offset+=event.clientX-dragX;dragX=event.clientX});
       ['pointerup','pointercancel','lostpointercapture'].forEach(type=>track.addEventListener(type,()=>{dragging=false}));
       requestAnimationFrame(move);
@@ -553,6 +592,7 @@
     overlay.addEventListener('scroll',()=>overlay.__tanemMasterUpdate?.(),{passive:true});
     window.addEventListener('salon-template:languagechange',()=>{
       if(!overlay.classList.contains('open'))return;
+      if(renderedLang===(currentLang()==='en'?'en':'ru'))return;
       const master=(data.team||[]).find(item=>item.id===selectedId);
       if(master)requestAnimationFrame(()=>render(master));
     });

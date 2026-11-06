@@ -35,18 +35,20 @@
     const copy=description(service,lang),price=localize(service.price,lang),time=duration(service.duration,lang);
     const id='service-description-'+device+'-'+(service.profileId||'catalogue')+'-'+service.id;
     const book=lang==='en'?'Book':'Записаться';
-    return '<article class="'+(device==='desktop'?'dct-service-card':'tn31-service-row')+' tanem-service-card" data-eva-service-id="'+escape(service.id)+'" data-eva-layout="'+device+'" data-eva-lang="'+lang+'">'+
+    const tariffRows=variants.map(v=>'<div><dt>'+escape(localize(v.label,lang))+'</dt><dd>'+escape(normalizePrice(localize(v.price,lang)))+'</dd></div>').join('');
+    const tariffs=tariffRows?'<dl class="tanem-service-tariffs">'+tariffRows+'</dl>':'';
+    const optionsLabel=service.variantType==='length'?(lang==='en'?'Prices by hair length':'Стоимость по длине'):(lang==='en'?'Options and prices':'Варианты и цены');
+    const options=variants.length>2?'<details class="tanem-service-options"><summary>'+optionsLabel+'</summary>'+tariffs+'</details>':tariffs;
+    return '<article class="'+(device==='desktop'?'dct-service-card':'tn31-service-row')+' tanem-service-card" data-eva-service-id="'+escape(service.id)+'" data-eva-profile="'+escape(service.profileId||'catalogue')+'" data-eva-layout="'+device+'" data-eva-lang="'+lang+'">'+
       '<div class="tanem-service-copy"><strong class="tanem-service-title '+(device==='desktop'?'dct-service-card-title':'tn31-service-name')+'">'+escape(title).replace(/([+/])/g,'$1<wbr>')+'</strong>'+
-      (variants.length?'<dl class="tanem-service-tariffs">'+variants.map(v=>'<div><dt>'+escape(localize(v.label,lang))+(localize(v.label,lang)?':':'')+'</dt><dd>'+escape(normalizePrice(localize(v.price,lang)))+'</dd></div>').join('')+'</dl>':'')+'</div>'+
+      options+'</div>'+
       '<div class="tanem-service-side">'+(time?'<small class="tanem-service-duration">'+escape(time)+'</small>':'')+(price?priceMarkup(price,device):'<span class="tanem-service-price">'+book+'</span>')+'</div>'+
-      (copy?'<div class="tanem-service-description'+''+'"><p id="'+escape(id)+'"'+''+'>'+escape(copy)+'</p><button class="tanem-service-more" type="button" aria-expanded="false" aria-controls="'+escape(id)+'">'+(lang==='en'?'Read more':'Подробнее')+'</button></div>':'')+
+      (copy?'<div class="tanem-service-description"><p id="'+escape(id)+'">'+escape(copy)+'</p><button class="tanem-service-more" type="button" aria-expanded="false" aria-controls="'+escape(id)+'">'+(lang==='en'?'Read more':'Подробнее')+'</button></div>':'')+
       '<button class="tanem-service-book" type="button" '+(device==='desktop'?'data-service-book':'data-book-service')+' aria-label="'+book+': '+escape(title)+'"></button></article>';
   }
   function measure(card){
     const box=card.querySelector('.tanem-service-description');if(!box)return;
     const paragraph=box.querySelector('p'),button=box.querySelector('button');
-    const expanded=button.getAttribute('aria-expanded')==='true',forced=box.classList.contains('is-tariff-description');
-    if(forced){paragraph.hidden=!expanded;button.hidden=false;return}
     box.classList.add('is-measuring');
     const needsMore=paragraph.getBoundingClientRect().height>(parseFloat(getComputedStyle(paragraph).lineHeight)||18)*2+1.5;
     box.classList.remove('is-measuring');
@@ -76,12 +78,15 @@
       if(card.dataset.evaLang===lang)return;
       const service=data.services.find(s=>s.id===card.dataset.evaServiceId);if(!service)return;
       const expanded=card.querySelector('.tanem-service-more')?.getAttribute('aria-expanded')==='true';
-      const holder=document.createElement('div');holder.innerHTML=render(service,card.dataset.evaLayout,lang);
+      const optionsOpen=card.querySelector('.tanem-service-options')?.open;
+      const holder=document.createElement('div');holder.innerHTML=render({...service,profileId:card.dataset.evaProfile},card.dataset.evaLayout,lang);
       const next=holder.firstElementChild;
       // Keep booking listeners on the existing button when changing the language.
       const oldBook=card.querySelector('.tanem-service-book'),newBook=next.querySelector('.tanem-service-book');
       oldBook.setAttribute('aria-label',newBook.getAttribute('aria-label'));newBook.replaceWith(oldBook);
       card.replaceChildren(...next.childNodes);card.dataset.evaLang=lang;
+      const options=card.querySelector('.tanem-service-options');
+      if(options)options.open=!!optionsOpen;
       if(expanded){const button=card.querySelector('.tanem-service-more');if(button){button.setAttribute('aria-expanded','true');button.textContent=lang==='en'?'Collapse':'Свернуть';button.parentElement.classList.add('is-expanded')}}
     });
     enhance(document);

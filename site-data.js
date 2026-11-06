@@ -3970,7 +3970,8 @@
           "duration": "",
           "price": "5 500 ₽"
         }
-      ]
+      ],
+      "variantType": "length"
     },
     {
       "id": "hair-length-color-joc",
@@ -4036,7 +4037,8 @@
           "duration": "",
           "price": "7 600 ₽"
         }
-      ]
+      ],
+      "variantType": "length"
     },
     {
       "id": "hair-length-color-permesse",
@@ -4102,7 +4104,8 @@
           "duration": "",
           "price": "8 600 ₽"
         }
-      ]
+      ],
+      "variantType": "length"
     },
     {
       "id": "hair-complex-color-kezy",
@@ -4168,7 +4171,8 @@
           "duration": "",
           "price": "11 500 ₽"
         }
-      ]
+      ],
+      "variantType": "length"
     },
     {
       "id": "hair-complex-color-joc",
@@ -4234,7 +4238,8 @@
           "duration": "",
           "price": "13 000 ₽"
         }
-      ]
+      ],
+      "variantType": "length"
     },
     {
       "id": "hair-complex-color-permesse",
@@ -4300,7 +4305,8 @@
           "duration": "",
           "price": "14 000 ₽"
         }
-      ]
+      ],
+      "variantType": "length"
     },
     {
       "id": "haircut",
@@ -4366,7 +4372,8 @@
           "duration": "",
           "price": "2 000 ₽"
         }
-      ]
+      ],
+      "variantType": "length"
     },
     {
       "id": "haircut-hot-scissors",
@@ -4432,7 +4439,8 @@
           "duration": "",
           "price": "2 600 ₽"
         }
-      ]
+      ],
+      "variantType": "length"
     },
     {
       "id": "haircut-bangs",
@@ -4498,7 +4506,8 @@
           "duration": "",
           "price": "450 ₽"
         }
-      ]
+      ],
+      "variantType": "length"
     },
     {
       "id": "hair-trim-one-cut",
@@ -4564,7 +4573,8 @@
           "duration": "",
           "price": "800 ₽"
         }
-      ]
+      ],
+      "variantType": "length"
     },
     {
       "id": "hair-trim-hot-scissors",
@@ -4630,7 +4640,8 @@
           "duration": "",
           "price": "1 200 ₽"
         }
-      ]
+      ],
+      "variantType": "length"
     },
     {
       "id": "hair-care-kezy",
@@ -4696,7 +4707,8 @@
           "duration": "",
           "price": "2 500 ₽"
         }
-      ]
+      ],
+      "variantType": "length"
     },
     {
       "id": "hair-care-hemp",
@@ -4762,7 +4774,8 @@
           "duration": "",
           "price": "3 500 ₽"
         }
-      ]
+      ],
+      "variantType": "length"
     },
     {
       "id": "hair-care-black-caviar",
@@ -4828,7 +4841,8 @@
           "duration": "",
           "price": "3 500 ₽"
         }
-      ]
+      ],
+      "variantType": "length"
     },
     {
       "id": "hair-care-barex-silk",
@@ -4894,7 +4908,8 @@
           "duration": "",
           "price": "4 500 ₽"
         }
-      ]
+      ],
+      "variantType": "length"
     },
     {
       "id": "hair-care-oncare-scalp",
@@ -4960,7 +4975,8 @@
           "duration": "",
           "price": "2 000 ₽"
         }
-      ]
+      ],
+      "variantType": "length"
     },
     {
       "id": "hair-styling-brush",
@@ -5026,7 +5042,8 @@
           "duration": "",
           "price": "1 800 ₽"
         }
-      ]
+      ],
+      "variantType": "length"
     },
     {
       "id": "hair-styling-tongs",
@@ -5092,7 +5109,8 @@
           "duration": "",
           "price": "2 100 ₽"
         }
-      ]
+      ],
+      "variantType": "length"
     },
     {
       "id": "hair-styling-flat-iron",
@@ -5158,7 +5176,8 @@
           "duration": "",
           "price": "1 620 ₽"
         }
-      ]
+      ],
+      "variantType": "length"
     },
     {
       "id": "hair-styling-evening",
@@ -5224,7 +5243,8 @@
           "duration": "",
           "price": "3 000 ₽"
         }
-      ]
+      ],
+      "variantType": "length"
     },
     {
       "id": "hair-color-cleanse",
@@ -5290,7 +5310,8 @@
           "duration": "",
           "price": "1 350 ₽"
         }
-      ]
+      ],
+      "variantType": "length"
     },
     {
       "id": "hair-color-cleanse-acid",
@@ -5356,7 +5377,8 @@
           "duration": "",
           "price": "—"
         }
-      ]
+      ],
+      "variantType": "length"
     },
     {
       "id": "hair-color-bath",
@@ -5422,7 +5444,8 @@
           "duration": "",
           "price": "1 000 ₽"
         }
-      ]
+      ],
+      "variantType": "length"
     },
     {
       "id": "hair-repigmentation",
@@ -5488,7 +5511,8 @@
           "duration": "",
           "price": "—"
         }
-      ]
+      ],
+      "variantType": "length"
     },
     {
       "id": "hair-decapitation",
@@ -5554,7 +5578,8 @@
           "duration": "",
           "price": "—"
         }
-      ]
+      ],
+      "variantType": "length"
     },
     {
       "id": "hair-wash",
@@ -5620,7 +5645,8 @@
           "duration": "",
           "price": "700 ₽"
         }
-      ]
+      ],
+      "variantType": "length"
     },
     {
       "id": "hair-wash-dry",
@@ -5686,7 +5712,8 @@
           "duration": "",
           "price": "900 ₽"
         }
-      ]
+      ],
+      "variantType": "length"
     },
     {
       "id": "hair-styling-products",
@@ -5983,7 +6010,8 @@
           "duration": "",
           "price": "3 700 ₽"
         }
-      ]
+      ],
+      "variantType": "length"
     },
     {
       "id": "hair-root-highlights-kezy",
@@ -6049,7 +6077,8 @@
           "duration": "",
           "price": "4 000 ₽"
         }
-      ]
+      ],
+      "variantType": "length"
     },
     {
       "id": "hair-highlights-kezy",
@@ -6115,7 +6144,8 @@
           "duration": "",
           "price": "6 700 ₽"
         }
-      ]
+      ],
+      "variantType": "length"
     },
     {
       "id": "hair-highlights-barex",
@@ -6181,7 +6211,8 @@
           "duration": "",
           "price": "6 700 ₽"
         }
-      ]
+      ],
+      "variantType": "length"
     },
     {
       "id": "hair-toning-kezy",
@@ -6247,7 +6278,8 @@
           "duration": "",
           "price": "5 000 ₽"
         }
-      ]
+      ],
+      "variantType": "length"
     },
     {
       "id": "hair-toning-joc",
@@ -6313,7 +6345,8 @@
           "duration": "",
           "price": "6 900 ₽"
         }
-      ]
+      ],
+      "variantType": "length"
     },
     {
       "id": "hair-toning-permesse",
@@ -6379,7 +6412,8 @@
           "duration": "",
           "price": "8 000 ₽"
         }
-      ]
+      ],
+      "variantType": "length"
     }
   ],
   "team": [
@@ -6400,8 +6434,8 @@
         "tg": "Косметолог"
       },
       "about": {
-        "ru": "Юлия — косметолог салона «Ева». В её разделе собраны косметологические процедуры из прайса салона, включая чистку лица Biorepeel и подростковую чистку лица.",
-        "en": "Julia is a cosmetologist at Eva. Her section lists the salon’s cosmetology services, including Biorepeel facial cleansing and teenage facial cleansing."
+        "ru": "Я Юлия, косметолог салона «Ева». Моя специализация — уход за кожей и косметологические процедуры для лица.",
+        "en": "I’m Julia, a cosmetologist at Eva salon. I specialize in skincare and facial treatments."
       },
       "photo": "team-01.webp",
       "categories": [
@@ -6430,8 +6464,8 @@
         "tg": "Парикмахер"
       },
       "about": {
-        "ru": "Эльвира — парикмахер салона «Ева». В её разделе можно выбрать парикмахерские услуги и посмотреть действующие цены салона.",
-        "en": "Elvira is a hairdresser at Eva. Her section lists hair services and the salon’s current prices."
+        "ru": "Я Эльвира, парикмахер салона «Ева». Выполняю стрижки и окрашивания волос.",
+        "en": "I’m Elvira, a hairdresser at Eva salon. My work includes haircuts and hair coloring."
       },
       "photo": "team-02.webp",
       "categories": [
@@ -6459,8 +6493,8 @@
         "tg": "Парикмахер"
       },
       "about": {
-        "ru": "Дарья — парикмахер салона «Ева». В отзывах клиенты рассказывают о стрижках и окрашивании волос у Дарьи. Услуги и цены собраны ниже.",
-        "en": "Darya is a hairdresser at Eva. Clients describe their haircuts and hair coloring with Darya in the reviews. Services and prices are listed below."
+        "ru": "Я Дарья, парикмахер салона «Ева». Занимаюсь стрижками и окрашиванием волос, в том числе окрашиванием в блонд.",
+        "en": "I’m Darya, a hairdresser at Eva salon. I do haircuts and hair coloring, including blonde coloring."
       },
       "photo": "team-03.webp",
       "categories": [
@@ -6489,8 +6523,8 @@
         "tg": "Бровист / лэшмейкер"
       },
       "about": {
-        "ru": "Анна — мастер по оформлению бровей и ресниц в салоне «Ева». В её разделе собраны услуги этого направления и действующие цены салона.",
-        "en": "Anna is a brow and lash artist at Eva. Her section lists brow and lash services and the salon’s current prices."
+        "ru": "Я Анна, мастер по бровям и ресницам салона «Ева». Моя специализация — оформление бровей и работа с ресницами.",
+        "en": "I’m Anna, a brow and lash artist at Eva salon. I specialize in brow shaping and lash services."
       },
       "photo": "team-04.webp",
       "categories": [
@@ -6516,8 +6550,8 @@
         "tg": "Мастер маникюра"
       },
       "about": {
-        "ru": "Марина — мастер маникюра салона «Ева». В отзывах клиенты рассказывают о маникюре и педикюре у Марины. Выбрать услугу и посмотреть цены можно ниже.",
-        "en": "Marina is a nail artist at Eva. Clients describe their manicures and pedicures with Marina in the reviews. Services and prices are listed below."
+        "ru": "Я Марина, мастер ногтевого сервиса салона «Ева». Выполняю маникюр и педикюр.",
+        "en": "I’m Marina, a nail artist at Eva salon. My work includes manicures and pedicures."
       },
       "photo": "team-05.webp",
       "categories": [
@@ -6546,8 +6580,8 @@
         "tg": "Мастер маникюра"
       },
       "about": {
-        "ru": "Олеся — мастер маникюра салона «Ева». В отзывах клиенты благодарят Олесю за маникюр. Услуги этого направления и цены собраны ниже.",
-        "en": "Olesya is a nail artist at Eva. Clients thank Olesya for their manicures in the reviews. Nail services and prices are listed below."
+        "ru": "Я Олеся, мастер маникюра салона «Ева». Занимаюсь маникюром и оформлением ногтей.",
+        "en": "I’m Olesya, a nail artist at Eva salon. I specialize in manicures and nail design."
       },
       "photo": "team-06.webp",
       "categories": [

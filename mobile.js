@@ -271,6 +271,7 @@ function resetMobileMore(){
  mobileMoreAnchorRun++;
  if(mobileMoreWrap){mobileMoreWrap.remove();mobileMoreWrap=null}
  servicesExpanded=false;
+ unlockMobileServiceAnchor();
 }
 function renderServices(){
  resetMobileMore();
@@ -370,6 +371,13 @@ sMore.onclick=()=>{
    wrap.ontransitionend=e=>{if(e.target===wrap&&e.propertyName==='height'&&!servicesExpanded){wrap.remove();mobileMoreWrap=null;stabilizeMobileMoreButton(anchorTop);unlockMobileServiceAnchor()}};
   }
  }
+ // A rapidly reversed transition may finish at the same height without transitionend.
+ if(duration)window.setTimeout(()=>{
+  if(token!==mobileMoreAnchorRun)return;
+  if(servicesExpanded&&mobileMoreWrap)mobileMoreWrap.style.height='auto';
+  else if(mobileMoreWrap){mobileMoreWrap.remove();mobileMoreWrap=null;stabilizeMobileMoreButton(anchorTop)}
+  unlockMobileServiceAnchor();
+ },duration+80);
 };
 window.addEventListener('salon-template:languagechange',e=>{
  updateServiceDurationLabels(e.detail&&e.detail.lang);
@@ -1264,11 +1272,27 @@ services.insertAdjacentElement('afterend',about);
       clearInterval(timer);
       setLanguage(currentLang,false);
       [250,700,1400].forEach(function(ms){setTimeout(applyLanguage,ms);});
-      root.addEventListener('click',function(e){
-        if(e.target.closest('.br-lang-switch')) return;
-        setTimeout(applyLanguage,0);
-        setTimeout(applyLanguage,90);
-      },true);
+      // Translate newly inserted UI only. Ordinary clicks never change the language.
+      const pendingScopes=new Set();
+      let translationFrame=0;
+      const dynamicTranslation=new MutationObserver(records=>{
+        records.forEach(record=>record.addedNodes.forEach(node=>{
+          const scope=node.nodeType===Node.ELEMENT_NODE?node:node.parentElement;
+          if(!scope||scope.closest('.tanem-service-card,.tanem-master-head,.tanem-master-sections,.tanem-master-jump'))return;
+          pendingScopes.add(scope);
+        }));
+        if(translationFrame||!pendingScopes.size)return;
+        translationFrame=requestAnimationFrame(()=>{
+          translationFrame=0;
+          pendingScopes.forEach(scope=>{
+            if(!scope.isConnected)return;
+            translateTree(scope,currentLang);
+            translateAttributes(scope,currentLang);
+          });
+          pendingScopes.clear();
+        });
+      });
+      dynamicTranslation.observe(root,{childList:true,subtree:true});
       setInterval(function(){
         var statusRoot=root.querySelector('#tn22Status');
         var heroStatus=root.querySelector('.tn50-hero-status');

@@ -19,6 +19,24 @@ for (const layout of ['desktop','mobile']) {
   assert.match(html,/>Индивидуальный уход\./);
   assert.match(html,/tanem-service-price">/);
   assert.doesNotMatch(html,/Мастер: 600 ₽/);
+  const lengthService={
+    id:'color-length',profileId:'elvira',variantType:'length',title:{ru:'Окрашивание'},price:'4 500–7 600 ₽',
+    variants:[
+      {label:{ru:'Короткие'},price:'4 500 ₽'},
+      {label:{ru:'Средние'},price:'5 500 ₽'},
+      {label:{ru:'Длинные'},price:'6 600 ₽'},
+      {label:{ru:'Очень длинные'},price:'7 600 ₽'},
+      {label:{ru:'Без цены'},price:'—'}
+    ],
+    description:{ru:'Окрашивание по длине.'}
+  };
+  const options=view.render(lengthService,layout,'ru');
+  assert.match(options,/<details class="tanem-service-options"><summary>Стоимость по длине<\/summary>/);
+  assert.doesNotMatch(options,/<details[^>]*\bopen\b/);
+  assert.equal((options.match(/<dd>/g)||[]).length,4);
+  assert.doesNotMatch(options,/Без цены/);
+  assert.match(options,new RegExp('service-description-'+layout+'-elvira-color-length'));
+  assert.match(options,/data-eva-profile="elvira"/);
   for (const item of data.services) {
     const rendered=view.render(item,layout,'ru');
     assert.ok(rendered.includes('tanem-service-book'));
