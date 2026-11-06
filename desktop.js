@@ -511,7 +511,7 @@
   function closeDesktopViewer(){
     gallery.classList.remove('open');
     resetDesktopViewer();
-    if(!galleryBrowser.classList.contains('open'))document.body.style.overflow='';
+    if(!galleryBrowser.classList.contains('open')&&!document.querySelector('.std-master-overlay.open'))document.body.style.overflow='';
   }
   function moveDesktopGallery(step){
     if(galleryItems.length<2)return;
@@ -558,7 +558,7 @@
   }
   function closeDesktopGalleryBrowser(){
     galleryBrowser.classList.remove('open');
-    if(!gallery.classList.contains('open'))document.body.style.overflow='';
+    if(!gallery.classList.contains('open')&&!document.querySelector('.std-master-overlay.open'))document.body.style.overflow='';
   }
 
   document.querySelectorAll('.std-work').forEach(btn=>{

@@ -411,6 +411,16 @@
     let renderedMasterId='',renderedLang='';
     let historyEntryOpen=false;
     const historyKey='tanemMasterProfile';
+    const profileCloseSelector=desktop?'#stdMasterPageClose':'.tn22-back';
+    const nestedCloseSelectors=desktop?[
+      '#stdBookOverlay.open #stdBookClose',
+      '#stdGallery.open #stdGalleryClose',
+      '#stdGalleryBrowser.open #stdGalleryBrowserBack'
+    ]:[
+      '#tn13BookSheet.open #tn13BookClose',
+      '.tn22-viewer.open .tn22-view-close',
+      '#tn13Gallery.open .tn22-gallery-back'
+    ];
     const tabs=['about','services','portfolio','reviews'];
     const copy={
       ru:{about:'О мастере',services:'Услуги',portfolio:'Портфолио',reviews:'Отзывы',book:'Записаться',more:'Показать весь прайс',less:'Свернуть прайс',emptyServices:'Услуги уточняются в салоне.',emptyPortfolio:'Фотографии по этому направлению пока не добавлены.',portfolioNote:'Примеры работ студии по направлению мастера',emptyReviews:'Персональные отзывы пока не добавлены.',source:'Источник: Sonline',view:'Открыть профиль в Sonline',none:'Длительность уточняется'},
@@ -585,10 +595,33 @@
       }
     }).observe(overlay,{attributes:true,attributeFilter:['class']});
     window.addEventListener('popstate',()=>{
+      const masterId=history.state?.[historyKey];
+      historyEntryOpen=!!masterId;
+      if(masterId){
+        const master=(data.team||[]).find(item=>item.id===masterId);
+        if(!master)return;
+        selectedId=masterId;
+        if(overlay.classList.contains('open'))render(master);
+        else{
+          const trigger=[...document.querySelectorAll('[data-desktop-master],[data-mid]')]
+            .find(button=>(button.dataset.desktopMaster||button.dataset.mid)===masterId);
+          trigger?.click();
+        }
+        return;
+      }
       if(!overlay.classList.contains('open'))return;
-      if(history.state?.[historyKey])return;
-      historyEntryOpen=false;
+      nestedCloseSelectors.forEach(selector=>document.querySelector(selector)?.click());
+      overlay.querySelector(profileCloseSelector)?.click();
     });
+    // Handle Escape before the individual dialogs so only the top layer closes.
+    document.addEventListener('keydown',event=>{
+      if(event.key!=='Escape'||!overlay.classList.contains('open'))return;
+      const close=nestedCloseSelectors.map(selector=>document.querySelector(selector)).find(Boolean)
+        ||overlay.querySelector(profileCloseSelector);
+      if(!close)return;
+      event.preventDefault();event.stopImmediatePropagation();
+      close.click();
+    },true);
     overlay.addEventListener('scroll',()=>overlay.__tanemMasterUpdate?.(),{passive:true});
     window.addEventListener('salon-template:languagechange',()=>{
       if(!overlay.classList.contains('open'))return;

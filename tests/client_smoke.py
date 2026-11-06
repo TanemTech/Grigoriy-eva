@@ -6,7 +6,7 @@ import os
 import re
 from pathlib import Path
 
-from playwright.sync_api import sync_playwright
+from playwright.sync_api import expect, sync_playwright
 
 HOST = os.environ.get("CLIENT_SITE_URL", "http://127.0.0.1:4176")
 
@@ -14,6 +14,49 @@ HOST = os.environ.get("CLIENT_SITE_URL", "http://127.0.0.1:4176")
 def must_equal(locator, expected, label):
     actual = (locator.first.text_content() or "").strip()
     assert actual == expected, f"{label}: {actual!r} instead of {expected!r}"
+
+
+def check_master_navigation(page, desktop):
+    trigger = page.locator(
+        '#salonDesktopTeam [data-desktop-master]:not([hidden])' if desktop
+        else '#tn13Team [data-mid]'
+    ).first
+    if not trigger.count():
+        return
+    profile = page.locator('#stdMasterOverlay' if desktop else '.tn22-master-page')
+    booking = page.locator('#stdBookOverlay' if desktop else '#tn13BookSheet')
+    book_button = profile.locator('#stdMasterPageBook' if desktop else '.tn22-master-book')
+    close_button = profile.locator('#stdMasterPageClose' if desktop else '.tn22-back')
+    open_class = re.compile(r'\bopen\b')
+    trigger.click(timeout=9000)
+    profile.locator('.tanem-master-head').wait_for(state='visible')
+
+    book_button.click()
+    expect(booking).to_have_class(open_class)
+    page.keyboard.press('Escape')
+    expect(booking).not_to_have_class(open_class)
+    expect(profile).to_have_class(open_class)
+
+    photo = profile.locator('[data-master-work]').first
+    if photo.count():
+        viewer = page.locator('#stdGallery' if desktop else '.tn22-viewer')
+        photo.click()
+        expect(viewer).to_have_class(open_class)
+        page.keyboard.press('Escape')
+        expect(viewer).not_to_have_class(open_class)
+        expect(profile).to_have_class(open_class)
+        if desktop:
+            assert page.locator('body').evaluate('(node) => node.style.overflow') == 'hidden', (
+                'Closing a master photo must keep background scrolling locked'
+            )
+
+    page.go_back()
+    expect(profile).not_to_have_class(open_class)
+    page.go_forward()
+    expect(profile).to_have_class(open_class)
+    profile.locator('.tanem-master-head').wait_for(state='visible')
+    close_button.click()
+    expect(profile).not_to_have_class(open_class)
 
 
 def check(browser, width, height, mobile, language):
@@ -118,6 +161,7 @@ def check(browser, width, height, mobile, language):
     if language in ("ru", "en"):
         must_equal(address_sub, expected_map_copy, "map provider action")
 
+    check_master_navigation(page, desktop)
     sample = page.locator("#stdHeaderBookBtn" if desktop else ".tn22-cta")
     sample.click(timeout=9000)
     links = page.locator("#stdBookOverlay .std-book-options a" if desktop
