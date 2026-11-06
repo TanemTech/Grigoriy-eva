@@ -417,15 +417,7 @@
     };
     function biography(master,lang){return text(master.about,lang)}
     function serviceMarkup(service,lang){
-      const name=text(service.title,lang);
-      const duration=text(service.duration,lang);
-      const parts={name,note:''};
-      const price=window.TANEM_SERVICES.normalizePrice(text(service.price,lang));
-      return '<button class="tanem-master-service" type="button" data-master-book>'+
-        '<span class="tanem-master-service-copy"><strong>'+esc(parts.name)+'</strong>'+
-        (parts.note?'<small>'+esc(parts.note)+'</small>':'')+'</span>'+
-        '<span class="tanem-master-service-side">'+(duration?'<small>'+esc(window.TANEM_SERVICES.duration(duration,lang))+'</small>':'')+
-        '<strong>'+esc(price||copy[lang].book)+'</strong></span></button>';
+      return window.TANEM_SERVICES.render({...service,profileId:'master'},desktop?'desktop':'mobile',lang);
     }
     function masterGallery(master){
       const groups=(master.categories||[]).map(category=>category==='Маникюр'||category==='Педикюр'?'Ногти':category);
@@ -503,7 +495,11 @@
       const track=target.querySelector('.tanem-master-review-track');
       if(track)startMasterReviews(track,overlay);
       const book=overlay.querySelector(desktop?'#stdMasterPageBook':'.tn22-master-book');
-      if(book)book.textContent=lang==='en'?'Book':'Записаться';
+      if(book){
+        const names={'Юлия':'Юлии','Эльвира':'Эльвире','Дарья':'Дарье','Анна':'Анне','Марина':'Марине','Олеся':'Олесе'};
+        book.textContent=lang==='en'?'Book with '+name:'Записаться к '+(names[name]||name);
+      }
+      window.TANEM_SERVICES.enhance(target);
       updateNav();
     }
     function startMasterReviews(track,container){
@@ -523,9 +519,8 @@
     }
     // Profile service rows AND its persistent booking CTA use one familiar chooser.
     overlay.addEventListener('click',event=>{
-      if(!event.target.closest('[data-master-book],#stdMasterPageBook,.tn22-master-book'))return;
+      if(!event.target.closest('[data-master-book],.tanem-service-book,#stdMasterPageBook,.tn22-master-book'))return;
       event.preventDefault();event.stopImmediatePropagation();
-      overlay.querySelector(desktop?'#stdMasterPageClose':'.tn22-back')?.click();
       if(desktop)document.getElementById('stdHeaderBookBtn')?.click();
       else document.querySelector('#tn13Top .tn22-cta')?.click();
     },true);
@@ -554,7 +549,6 @@
       if(!overlay.classList.contains('open'))return;
       if(history.state?.[historyKey])return;
       historyEntryOpen=false;
-      overlay.querySelector(desktop?'#stdMasterPageClose':'.tn22-back')?.click();
     });
     overlay.addEventListener('scroll',()=>overlay.__tanemMasterUpdate?.(),{passive:true});
     window.addEventListener('salon-template:languagechange',()=>{

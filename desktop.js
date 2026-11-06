@@ -429,7 +429,7 @@
   const bookBtn=document.getElementById('stdBookBtn');
   const bookOverlay=document.getElementById('stdBookOverlay');
   const openDesktopBooking=()=>{bookOverlay.classList.add('open');document.body.style.overflow='hidden'};
-  const closeDesktopBooking=()=>{bookOverlay.classList.remove('open');if(!document.querySelector('.std-gallery.open,.std-gallery-browser.open'))document.body.style.overflow=''};
+  const closeDesktopBooking=()=>{bookOverlay.classList.remove('open');if(!document.querySelector('.std-gallery.open,.std-gallery-browser.open,.std-master-overlay.open'))document.body.style.overflow=''};
   bookBtn.addEventListener('click',openDesktopBooking);
   const headerBookBtn=document.getElementById('stdHeaderBookBtn');
   if(headerBookBtn)headerBookBtn.addEventListener('click',openDesktopBooking);
@@ -498,7 +498,7 @@
   function openDesktopViewer(items,index=0,source='gallery'){
     galleryItems=Array.isArray(items)&&items.length?items:PORTFOLIO.slice();
     gallery.dataset.source=source;
-    galleryViewAll.hidden=source!=='portfolio';
+    galleryViewAll.hidden=source!=='portfolio'&&source!=='master';
     galleryIndex=Math.max(0,Math.min(index,galleryItems.length-1));
     paintGallery();
     gallery.classList.add('open');
@@ -506,7 +506,7 @@
   }
   document.addEventListener('tanem:open-master-gallery',event=>{
     const {items,index}=event.detail||{};
-    if(Array.isArray(items)&&items.length)openDesktopViewer(items,index||0,'master');
+    if(Array.isArray(items)&&items.length)openDesktopViewer(items,index||0,'portfolio');
   });
   function closeDesktopViewer(){
     gallery.classList.remove('open');

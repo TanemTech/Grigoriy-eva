@@ -31,15 +31,15 @@
     return '<span class="tanem-service-price">'+escape(price)+'</span>';
   }
   function render(service,device,lang=language()){
-    const title=localize(service.title,lang).replace(/\u00ad/g,''),variants=service.variants||[];
+    const title=localize(service.title,lang).replace(/\u00ad/g,''),variants=(service.variants||[]).filter(v=>/\d/u.test(localize(v.price,lang)));
     const copy=description(service,lang),price=localize(service.price,lang),time=duration(service.duration,lang);
-    const id='service-description-'+device+'-'+service.id;
+    const id='service-description-'+device+'-'+(service.profileId||'catalogue')+'-'+service.id;
     const book=lang==='en'?'Book':'Записаться';
     return '<article class="'+(device==='desktop'?'dct-service-card':'tn31-service-row')+' tanem-service-card" data-eva-service-id="'+escape(service.id)+'" data-eva-layout="'+device+'" data-eva-lang="'+lang+'">'+
       '<div class="tanem-service-copy"><strong class="tanem-service-title '+(device==='desktop'?'dct-service-card-title':'tn31-service-name')+'">'+escape(title).replace(/([+/])/g,'$1<wbr>')+'</strong>'+
       (variants.length?'<dl class="tanem-service-tariffs">'+variants.map(v=>'<div><dt>'+escape(localize(v.label,lang))+(localize(v.label,lang)?':':'')+'</dt><dd>'+escape(normalizePrice(localize(v.price,lang)))+'</dd></div>').join('')+'</dl>':'')+'</div>'+
       '<div class="tanem-service-side">'+(time?'<small class="tanem-service-duration">'+escape(time)+'</small>':'')+(price?priceMarkup(price,device):'<span class="tanem-service-price">'+book+'</span>')+'</div>'+
-      (copy?'<div class="tanem-service-description'+(variants.length?' is-tariff-description':'')+'"><p id="'+escape(id)+'"'+(variants.length?' hidden':'')+'>'+escape(copy)+'</p><button class="tanem-service-more" type="button" aria-expanded="false" aria-controls="'+escape(id)+'">'+(lang==='en'?'Read more':'Подробнее')+'</button></div>':'')+
+      (copy?'<div class="tanem-service-description'+''+'"><p id="'+escape(id)+'"'+''+'>'+escape(copy)+'</p><button class="tanem-service-more" type="button" aria-expanded="false" aria-controls="'+escape(id)+'">'+(lang==='en'?'Read more':'Подробнее')+'</button></div>':'')+
       '<button class="tanem-service-book" type="button" '+(device==='desktop'?'data-service-book':'data-book-service')+' aria-label="'+book+': '+escape(title)+'"></button></article>';
   }
   function measure(card){

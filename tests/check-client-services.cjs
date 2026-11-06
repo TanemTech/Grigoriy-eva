@@ -15,8 +15,8 @@ for (const layout of ['desktop','mobile']) {
   const html=view.render(service,layout,'ru');
   assert.equal((html.match(/<dt>/g)||[]).length,2);
   assert.equal((html.match(/<dd>/g)||[]).length,2);
-  assert.match(html,/is-tariff-description/);
-  assert.match(html,/hidden>Индивидуальный уход\./);
+  assert.doesNotMatch(html,/is-tariff-description/);
+  assert.match(html,/>Индивидуальный уход\./);
   assert.match(html,/tanem-service-price">/);
   assert.doesNotMatch(html,/Мастер: 600 ₽/);
   for (const item of data.services) {
