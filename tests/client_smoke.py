@@ -201,6 +201,11 @@ def check(browser, width, height, mobile, language):
             and "/mc.yandex.com/watch/" in error
             and "due to access control checks." in error
         )
+        and not (
+            HOST.startswith("http://127.0.0.1")
+            and error.startswith("/yandex.ru/ads/meta/")
+            and error.endswith("due to access control checks.")
+        )
     ]
     # The map's optional advertising script is not an application asset.
     if HOST.startswith("http://127.0.0.1"):
