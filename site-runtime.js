@@ -424,8 +424,8 @@
       '#tn13Gallery.open .tn22-gallery-back'
     ];
     const copy={
-      ru:{about:'О мастере',services:'Услуги',portfolio:'Портфолио',reviews:'Отзывы',book:'Записаться',more:'Показать весь прайс',less:'Свернуть прайс',emptyServices:'Услуги уточняются в салоне.',emptyPortfolio:'Фотографии по этому направлению пока не добавлены.',portfolioNote:'Примеры работ студии по направлению мастера',emptyReviews:'Персональные отзывы пока не добавлены.',source:'Источник: Sonline',view:'Открыть профиль в Sonline',none:'Длительность уточняется'},
-      en:{about:'About',services:'Services',portfolio:'Portfolio',reviews:'Reviews',book:'Book',more:'Show full price list',less:'Collapse price list',emptyServices:'Check services with the salon.',emptyPortfolio:'Studio gallery photos for this specialty are not available yet.',portfolioNote:'Studio work examples in this specialty',emptyReviews:'Individual reviews are not available yet.',source:'Source: Sonline',view:'Open Sonline profile',none:'Duration on request'}
+      ru:{about:'О мастере',services:'Услуги',portfolio:'Портфолио',reviews:'Отзывы',book:'Записаться',more:'Показать весь прайс',less:'Свернуть прайс',emptyServices:'Услуги уточняются в салоне.',emptyPortfolio:'Фотографии по этому направлению пока не добавлены.',portfolioNote:'Примеры работ студии по направлению мастера',emptyReviews:'Отзывы пока не добавлены.',source:'Источник: Sonline',view:'Открыть профиль в Sonline',none:'Длительность уточняется'},
+      en:{about:'About',services:'Services',portfolio:'Portfolio',reviews:'Reviews',book:'Book',more:'Show full price list',less:'Collapse price list',emptyServices:'Check services with the salon.',emptyPortfolio:'Studio gallery photos for this specialty are not available yet.',portfolioNote:'Studio work examples in this specialty',emptyReviews:'Reviews have not been added yet.',source:'Source: Sonline',view:'Open Sonline profile',none:'Duration on request'}
     };
     function biography(master,lang){return text(master.about,lang)}
     function serviceMarkup(service,lang,masterId){
@@ -467,11 +467,8 @@
       const items=(data.services||[]).filter(item=>master.serviceIds?.length?master.serviceIds.includes(item.id):(master.categories||[]).includes(item.category));
       const works=masterGallery(master);
       const visibleWorks=desktop&&works.length>=3?works.slice(0,Math.min(9,Math.floor(works.length/3)*3)):works;
-      const reviewPreview=desktop&&data.masterReviews?.previewMasterId===master.id;
-      const reviewsEnabled=data.masterReviews?.enabled!==false;
-      const originalReviews=profileReviews(master,lang);
-      const reviews=reviewPreview?[...originalReviews,...originalReviews].map(review=>({...review,preview:true})):(reviewsEnabled?originalReviews:[]);
-      const tabs=['about','services','portfolio',...(reviews.length?['reviews']:[])];
+      // Personal reviews are withheld until approved. Keep the section visible.
+      const tabs=['about','services','portfolio','reviews'];
       const name=text(master.name,lang),role=text(master.role,lang),avatar=typeof master.photo==='string'?master.photo:master.photo?.src;
       const genitives={'Юлия':'Юлии','Эльвира':'Эльвиры','Дарья':'Дарьи','Анна':'Анны','Марина':'Марины','Олеся':'Олеси'};
       const moreLabel=lang==='en'?'Show all services by '+name:'Показать все услуги '+(genitives[name]||name);
@@ -486,9 +483,7 @@
         '<section class="tanem-master-section" id="tanem-master-portfolio"><h3>'+esc(words.portfolio)+'</h3>'+
           (works.length?'<p class="tanem-master-gallery-note">'+esc(words.portfolioNote)+'</p><div class="tanem-master-gallery'+(visibleWorks.length<=2?' is-paired':'')+'">'+visibleWorks.map((item,i)=>'<button type="button" data-master-work="'+i+'" aria-label="'+esc(lang==='en'?'View photo':'Посмотреть фотографию')+'"><img src="'+esc(item.src)+'" alt="'+esc(text(item.alt,lang))+'" loading="lazy"></button>').join('')+'</div><button class="tanem-master-more" type="button" data-master-gallery>'+esc(lang==='en'?'Open gallery':'Открыть галерею')+' <span aria-hidden="true">→</span></button>':
             '<p class="tanem-master-empty">'+esc(words.emptyPortfolio)+'</p>')+'</section>',
-        reviews.length?'<section class="tanem-master-section" id="tanem-master-reviews"><h3>'+esc(words.reviews)+'</h3>'+
-          (reviewPreview?'<p class="tanem-master-gallery-note">'+esc(lang==='en'?'Scroll preview: existing reviews are repeated for testing.':'Проверка прокрутки: существующие отзывы временно повторены для теста.')+'</p>':'')+
-          '<div class="tanem-master-review-window"><div class="tanem-master-review-track">'+reviews.map(review=>reviewMarkup(review,lang)).join('')+(desktop?reviews.map(review=>reviewMarkup(review,lang,true)).join(''):'')+'</div></div></section>':''
+        '<section class="tanem-master-section" id="tanem-master-reviews"><h3>'+esc(words.reviews)+'</h3><p class="tanem-master-empty">'+esc(words.emptyReviews)+'</p></section>'
       ];
       target.innerHTML='<div class="tanem-master-head"><div class="tanem-master-photo">'+(avatar?'<img src="'+esc(avatar)+'" alt="'+esc(name)+'">':'')+'</div><h2>'+esc(name)+'</h2><p>'+esc(role)+'</p></div><div class="tanem-master-sections">'+sections.join('')+'</div>';
       const existing=overlay.querySelector('.tanem-master-jump');
@@ -524,8 +519,6 @@
       };
       target.querySelectorAll('[data-master-work]').forEach(button=>button.addEventListener('click',()=>openWorks(Number(button.dataset.masterWork)||0,false,button)));
       target.querySelector('[data-master-gallery]')?.addEventListener('click',event=>openWorks(0,true,event.currentTarget));
-      const track=target.querySelector('.tanem-master-review-track');
-      if(track)stopReviewMotion=startMasterReviews(track,overlay);
       const book=overlay.querySelector(desktop?'#stdMasterPageBook':'.tn22-master-book');
       if(book){
         const names={'Юлия':'Юлии','Эльвира':'Эльвире','Дарья':'Дарье','Анна':'Анне','Марина':'Марине','Олеся':'Олесе'};
@@ -534,7 +527,7 @@
       window.TANEM_SERVICES.enhance(target);
       target.querySelectorAll('[data-eva-service-id]').forEach(card=>{
         const options=card.querySelector('.tanem-service-options');
-        if(options)options.open=openOptions.has(card.dataset.evaServiceId);
+        if(options){options.open=openOptions.has(card.dataset.evaServiceId);const label=options.querySelector('.tanem-options-label');if(options.open&&label)label.textContent=label.textContent.replace(/ \+$/,' −')}
       });
       updateNav();
     }

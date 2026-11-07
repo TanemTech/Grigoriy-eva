@@ -510,7 +510,7 @@
     const {items,index,category,showGallery}=event.detail||{};
     if(!Array.isArray(items)||!items.length)return;
     masterGalleryContext={items,category};
-    if(showGallery)openDesktopGalleryBrowser(category,items);
+    if(showGallery)openDesktopGalleryBrowser(category);
     else openDesktopViewer(items,index||0,'master');
   });
   function closeDesktopViewer(){
@@ -580,7 +580,7 @@
   document.getElementById('stdGalleryNext').addEventListener('click',()=>moveDesktopGallery(1));
   galleryViewAll.addEventListener('click',()=>{
     const context=gallery.dataset.source==='master'?masterGalleryContext:null;
-    closeDesktopViewer();openDesktopGalleryBrowser(context?.category||'Ногти',context?.items||null);
+    closeDesktopViewer();openDesktopGalleryBrowser(context?.category||'Ногти');
   });
   gallery.addEventListener('click',e=>{if(e.target===gallery)closeDesktopViewer()});
 
