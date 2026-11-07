@@ -144,24 +144,27 @@ def check(browser, width, height, mobile, language):
         assert page.locator(".tanem-service-card .tanem-service-price").count() == cards.count()
         if desktop:
             assert page.locator('#stdServiceTabs [data-service-category="all"]').count() == 0
-        # Root coloring is in the hair category, not the initial manicure category.
-        hair_category = (
-            page.locator('#stdServiceTabs [data-service-category="Волосы"]') if desktop
-            else page.locator('#tn13Services [data-scat="Волосы"]')
+        # Select a category containing a real variant-priced service.
+        variant_service = next((item for item in data["services"] if item.get("variants")), None)
+        assert variant_service, "The production fixture must include a variant-priced service"
+        category = variant_service["category"]
+        category_button = (
+            page.locator(f'#stdServiceTabs [data-service-category="{category}"]') if desktop
+            else page.locator(f'#tn13Services [data-scat="{category}"]')
         )
-        hair_category.click(timeout=9000)
+        category_button.click(timeout=9000)
         catalogue_root = "#stdServiceList" if desktop else "#tn13Services"
         options = page.locator(f'{catalogue_root} .tanem-service-card .tanem-service-options').first
         assert options.count(), "The main service catalogue must expose its option-price controls"
-        root_coloring = page.locator(
-            f'{catalogue_root} [data-eva-service-id="hair-root-coloring"] .tanem-service-options'
+        variant_card = page.locator(
+            f'{catalogue_root} [data-eva-service-id="{variant_service["id"]}"] .tanem-service-options'
         )
-        assert root_coloring.count(), "Root-coloring options must remain in the main service catalogue"
-        root_label = root_coloring.locator('.tanem-options-label')
-        assert root_label.evaluate('el => getComputedStyle(el).borderBottomWidth') == '1px'
-        assert root_coloring.locator('summary').evaluate(
+        assert variant_card.count(), "Variant-priced service must remain in the main service catalogue"
+        variant_label = variant_card.locator('.tanem-options-label')
+        assert variant_label.evaluate('el => getComputedStyle(el).borderBottomWidth') == '1px'
+        assert variant_card.locator('summary').evaluate(
             'el => getComputedStyle(el).textDecorationLine'
-        ) == 'none', "Root-coloring options need one thin underline, not a default text underline"
+        ) == 'none', "Variant-priced service needs one thin underline, not a default text underline"
 
         if options.count():
             summary = options.locator('summary')
