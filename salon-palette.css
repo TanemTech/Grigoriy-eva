@@ -884,8 +884,8 @@ html[data-br-device="desktop"] #salonDesktopTop .std-logo-image{
 }
 html[data-br-device="desktop"] #salonDesktopTop .std-logo-image img{
   display:block;
-  width:clamp(175px,17vw,235px);
-  height:110px;
+  width:clamp(201.25px,19.55vw,270.25px);
+  height:126.5px;
   max-width:100%;
   object-fit:contain;
   object-position:center;
