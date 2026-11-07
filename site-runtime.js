@@ -640,7 +640,11 @@
         // Reopening from browser Forward may remove .closing before the next
         // animation frame adds .open. That intermediate state is not a close.
         if(restoringHistoryProfile)return;
-        if(historyEntryOpen&&history.state?.[historyKey])history.back();
+        if(historyEntryOpen&&history.state?.[historyKey]){
+          const state={...history.state};
+          delete state[historyKey];
+          history.replaceState(state,'');
+        }
         historyEntryOpen=false;
         return;
       }
