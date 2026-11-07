@@ -195,7 +195,7 @@
     const root=document.getElementById('salon-desktop-v1');
     if(!root)return;
     const salon=data.salon,contacts=data.contacts;
-    setText('.std-header-brand-main,.std-logo,.dct-about-brand',text(salon.name,lang),root);
+    setText('.std-header-brand-main,.std-logo:not(.std-logo-image),.dct-about-brand',text(salon.name,lang),root);
     const desktopBrand=root.querySelector('.std-header-brand-main');
     if(desktopBrand){
       const cleanName=text(salon.name,lang).trim();
