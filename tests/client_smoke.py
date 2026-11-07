@@ -144,7 +144,28 @@ def check(browser, width, height, mobile, language):
         assert page.locator(".tanem-service-card .tanem-service-price").count() == cards.count()
         if desktop:
             assert page.locator('#stdServiceTabs [data-service-category="all"]').count() == 0
-        options = page.locator(f'{root} .tanem-service-card .tanem-service-options').first
+        # Select a category containing a real variant-priced service.
+        variant_service = next((item for item in data["services"] if item.get("variants")), None)
+        assert variant_service, "The production fixture must include a variant-priced service"
+        category = variant_service["category"]
+        category_button = (
+            page.locator(f'#stdServiceTabs [data-service-category="{category}"]') if desktop
+            else page.locator(f'#tn13Services [data-scat="{category}"]')
+        )
+        category_button.click(timeout=9000)
+        catalogue_root = "#stdServiceList" if desktop else "#tn13Services"
+        options = page.locator(f'{catalogue_root} .tanem-service-card .tanem-service-options').first
+        assert options.count(), "The main service catalogue must expose its option-price controls"
+        variant_card = page.locator(
+            f'{catalogue_root} [data-eva-service-id="{variant_service["id"]}"] .tanem-service-options'
+        )
+        assert variant_card.count(), "Variant-priced service must remain in the main service catalogue"
+        variant_label = variant_card.locator('.tanem-options-label')
+        assert variant_label.evaluate('el => getComputedStyle(el).borderBottomWidth') == '1px'
+        assert variant_card.locator('summary').evaluate(
+            'el => getComputedStyle(el).textDecorationLine'
+        ) == 'none', "Variant-priced service needs one thin underline, not a default text underline"
+
         if options.count():
             summary = options.locator('summary')
             label = summary.locator('.tanem-options-label')
@@ -191,8 +212,52 @@ def check(browser, width, height, mobile, language):
             if mobile:
                 assert summary.bounding_box()['height'] <= 30, 'Disclosure hit area must not inflate a service card'
 
-            # Exercise fast reversals while the height animation is still running.
+            # Verify that opening and closing both visibly animate the panel.
             page.emulate_media(reduced_motion='no-preference')
+            summary.click(timeout=9000)
+            expect(options).to_have_attribute('open', '')
+            # Sample the active animation at its midpoint. This avoids relying
+            # on browser frame timing (WebKit can still be on its first frame).
+            opening = page.evaluate("""el => {
+                const panel = el.querySelector('.tanem-options-panel');
+                const animation = panel.getAnimations().find(a => a.playState === 'running');
+                if (!animation) return {running:false, height:panel.getBoundingClientRect().height, contentHeight:panel.scrollHeight};
+                animation.pause();
+                animation.currentTime = 130;
+                const height = panel.getBoundingClientRect().height;
+                animation.play();
+                return {running:true, height, contentHeight:panel.scrollHeight};
+            }""", options.element_handle())
+            assert opening['running'], 'Opening the option-price panel must animate'
+            assert 0 < opening['height'] < opening['contentHeight'], (
+                f'Opening must begin gradually, not jump to full height: {opening}'
+            )
+            page.wait_for_function(
+                "el => { const panel = el.querySelector('.tanem-options-panel'); "
+                "return el.open && !panel.getAnimations().some(a => a.playState === 'running') "
+                "&& panel.getBoundingClientRect().height > 0; }",
+                arg=options.element_handle(), timeout=2000
+            )
+
+            summary.click(timeout=9000)
+            closing = page.evaluate("""el => {
+                const panel = el.querySelector('.tanem-options-panel');
+                const animation = panel.getAnimations().find(a => a.playState === 'running');
+                if (!animation) return {running:false, height:panel.getBoundingClientRect().height, contentHeight:panel.scrollHeight};
+                animation.pause();
+                animation.currentTime = 130;
+                const height = panel.getBoundingClientRect().height;
+                animation.play();
+                return {running:true, height, contentHeight:panel.scrollHeight};
+            }""", options.element_handle())
+            assert closing['running'], 'Closing the option-price panel must animate'
+            assert 0 < closing['height'] < closing['contentHeight'], (
+                f'Closing must collapse gradually: {closing}'
+            )
+            expect(options).not_to_have_attribute('open', '', timeout=2000)
+            assert summary.get_attribute('aria-expanded') == 'false'
+
+            # Exercise fast reversals while the height animation is still running.
             summary.click(timeout=9000)
             summary.click(timeout=9000)
             expect(options).not_to_have_attribute('open', '', timeout=2000)
