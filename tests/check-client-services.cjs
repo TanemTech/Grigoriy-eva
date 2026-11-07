@@ -15,7 +15,7 @@ for (const layout of ['desktop','mobile']) {
   const html=view.render(service,layout,'ru');
   assert.equal((html.match(/<dt>/g)||[]).length,2);
   assert.equal((html.match(/<dd>/g)||[]).length,2);
-  assert.match(html,/<details class="tanem-service-options"><summary>Варианты и цены<\/summary>/);
+  assert.match(html,/<details class="tanem-service-options"><summary><span class="tanem-options-label">Варианты и цены \+<\/span><\/summary><div class="tanem-options-panel">/);
   assert.doesNotMatch(html,/<details[^>]*\bopen\b/);
   assert.doesNotMatch(html,/is-tariff-description/);
   assert.match(html,/>Индивидуальный уход\./);
@@ -33,7 +33,7 @@ for (const layout of ['desktop','mobile']) {
     description:{ru:'Окрашивание по длине.'}
   };
   const options=view.render(lengthService,layout,'ru');
-  assert.match(options,/<details class="tanem-service-options"><summary>Стоимость по длине<\/summary>/);
+  assert.match(options,/<details class="tanem-service-options"><summary><span class="tanem-options-label">Стоимость по длине \+<\/span><\/summary><div class="tanem-options-panel">/);
   assert.doesNotMatch(options,/<details[^>]*\bopen\b/);
   assert.equal((options.match(/<dd>/g)||[]).length,4);
   assert.doesNotMatch(options,/Без цены/);

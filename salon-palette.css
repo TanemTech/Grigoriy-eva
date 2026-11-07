@@ -575,6 +575,10 @@ html[data-br-device="mobile"] #salon-mobile .tn22-master-page .tanem-master-head
   padding:27px 3px 36px;
 }
 html[data-br-device="mobile"] #salon-mobile .tn22-master-page .tanem-master-photo{width:142px;height:142px}
+/* The portrait grows only inside the opened desktop profile. */
+html[data-br-device="desktop"] #stdMasterOverlay .tanem-master-photo{width:198px;height:198px}
+/* The main price gains five percent on desktop; placement and durations stay fixed. */
+html[data-br-device="desktop"] #salon-desktop-v1 :is(#salonDesktopServices,.tanem-master-price-list) .tanem-service-price{font-size:17.85px!important}
 html[data-br-device="mobile"] #salon-mobile .tn22-master-page .tanem-master-head h2{font-size:48px}
 html[data-br-device="mobile"] #salon-mobile .tn22-master-page .tanem-master-head p{font-size:12px}
 html[data-br-device="mobile"] #salon-mobile .tn22-master-page .tanem-master-sections{padding-bottom:0}
@@ -760,22 +764,40 @@ html[data-br-device="mobile"] #salon-mobile .tn22-master-page .tanem-master-gall
 html[data-br-device="mobile"] #salon-mobile #tn13BookSheet{z-index:10050!important}
 html[data-br-device="desktop"] #salon-desktop-v1 #stdBookOverlay{z-index:10050!important}
 
-/* Disclosure is separate from booking, with a quiet five-second hint. */
-html[data-br-device] .tanem-service-options summary::before{
-  content:'';position:absolute;inset:0;pointer-events:none;
-  background:linear-gradient(105deg,transparent 25%,currentColor 50%,transparent 75%);
-  transform:translateX(-140%);opacity:0;animation:tanem-options-glint 5s ease-in-out infinite;
+/* Common gallery must sit above an open master profile, while photo viewer stays above it. */
+html[data-br-device="desktop"] #salon-desktop-v1 #stdGalleryBrowser{z-index:700!important}
+html[data-br-device="desktop"] #salon-desktop-v1 #stdGallery{z-index:760!important}
+html[data-br-device="mobile"] #salon-mobile #tn13Gallery{z-index:700!important}
+
+/* Only the lettering shines: the invisible tapping room does not affect card height. */
+html[data-br-device] .tanem-service-options summary{
+  min-height:24px!important;margin:4px 0 0!important;padding:0!important;
+  overflow:visible!important;align-items:center!important;
 }
-html[data-br-device] .tanem-service-options[open] summary::before{animation:none}
+html[data-br-device] .tanem-service-options summary::before{content:none!important;animation:none!important}
+html[data-br-device] .tanem-service-options summary::after{
+  content:''!important;position:absolute;inset:-9px -11px;pointer-events:auto;
+}
+html[data-br-device] .tanem-service-options .tanem-options-label{
+  --tanem-options-base:#c8c2bc;
+  display:inline-block;white-space:normal;line-height:1.35;
+  color:var(--tanem-options-base);border-bottom:1px solid var(--tanem-options-base);
+  background-image:linear-gradient(110deg,var(--tanem-options-base) 28%,#f9e0a7 48%,var(--tanem-options-base) 68%);
+  background-size:260% 100%;background-position:100% 0;
+  background-clip:text;-webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  animation:tanem-letter-glint 5s linear infinite;
+}
+html[data-br-device] .tanem-master-price-list .tanem-options-label{--tanem-options-base:#6f6258}
+html[data-br-device] .tanem-service-options[open] .tanem-options-label{animation:none;background-image:none;-webkit-text-fill-color:currentColor}
+html[data-br-device="mobile"] #salon-mobile .tanem-service-options summary{min-height:24px!important;font-size:13px}
+html[data-br-device="desktop"] #stdMasterOverlay [data-master-gallery]{font-size:14px}
+@keyframes tanem-letter-glint{
+  0%,80%{background-position:100% 0}
+  94%,100%{background-position:0 0}
+}
 html[data-br-device] .tanem-service-options summary:focus-visible{outline:2px solid #b8a48f;outline-offset:-2px}
-html[data-br-device="mobile"] #salon-mobile .tanem-service-options summary{min-height:40px;font-size:13px}
-@keyframes tanem-options-glint{
-  0%,82%{transform:translateX(-140%);opacity:0}
-  86%{opacity:.2}
-  96%,100%{transform:translateX(140%);opacity:0}
-}
 @media(prefers-reduced-motion:reduce){
-  html[data-br-device] .tanem-service-options summary::before{animation:none}
+  html[data-br-device] .tanem-service-options .tanem-options-label{animation:none}
 }
 :is(#stdMasterOverlay,.tn22-master-page) .tanem-master-extra{overflow:hidden}
 #stdGalleryBrowserTabs[hidden],#tn13Gallery .tn22-gallery-tabs-wrap[hidden]{display:none!important}

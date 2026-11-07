@@ -30,6 +30,9 @@ def check_master_navigation(page, desktop):
     open_class = re.compile(r'\bopen\b')
     trigger.click(timeout=9000)
     profile.locator('.tanem-master-head').wait_for(state='visible')
+    if desktop:
+        portrait = profile.locator('.tanem-master-photo')
+        assert 196 <= portrait.bounding_box()['width'] <= 200, 'Opened desktop portrait must be only slightly enlarged'
 
     book_button.click()
     expect(booking).to_have_class(open_class)
@@ -47,20 +50,36 @@ def check_master_navigation(page, desktop):
         gallery_button.click()
         gallery = page.locator('#stdGalleryBrowser' if desktop else '#tn13Gallery')
         expect(gallery).to_have_class(open_class)
-        # The profile gallery must preserve exactly the same photo set as its viewer.
+        # This is the COMMON gallery, with its complete category and visible tabs.
         tiles = gallery.locator('.std-gallery-browser-tile' if desktop else '.tn22-gallery-tile')
-        assert tiles.count() >= profile.locator('[data-master-work]').count()
         gallery_tabs = gallery.locator('#stdGalleryBrowserTabs' if desktop else '.tn22-gallery-tabs-wrap')
-        expect(gallery_tabs).to_be_hidden()
+        expect(gallery_tabs).to_be_visible()
+        active = gallery_tabs.locator('.active').first.text_content().strip()
+        expected = page.evaluate('(category) => window.TANEM_SITE_DATA.media.gallery[category]?.length', active)
+        assert expected and tiles.count() == expected, (
+            f'Master gallery category {active!r} should contain all {expected} photos, got {tiles.count()}'
+        )
         assert "SALON NAME" not in gallery.inner_text(), "Lazy gallery must render the client brand"
         page.keyboard.press('Escape')
         expect(gallery).not_to_have_class(open_class)
         expect(viewer).not_to_have_class(open_class)
         expect(profile).to_have_class(open_class)
+        direct_gallery = profile.locator('[data-master-gallery]')
+        direct_gallery.click()
+        expect(gallery).to_have_class(open_class)
+        expect(gallery_tabs).to_be_visible()
+        page.keyboard.press('Escape')
+        expect(profile).to_have_class(open_class)
         if desktop:
             assert page.locator('body').evaluate('(node) => node.style.overflow') == 'hidden', (
                 'Closing a master photo must keep background scrolling locked'
             )
+
+    review_section = profile.locator('#tanem-master-reviews')
+    expect(review_section).to_be_visible()
+    assert 'пока не добавлены' in review_section.inner_text().lower(), 'Master reviews need a neutral empty state'
+    assert 'Проверка прокрутки' not in profile.inner_text(), 'Test copy must never appear on a client site'
+    assert profile.locator('.tanem-master-review').count() == 0, 'Temporary testimonials must be removed'
 
     page.go_back()
     expect(profile).not_to_have_class(open_class)
@@ -123,6 +142,17 @@ def check(browser, width, height, mobile, language):
         assert page.locator(".tanem-service-card .tanem-service-price").count() == cards.count()
         if desktop:
             assert page.locator('#stdServiceTabs [data-service-category="all"]').count() == 0
+        options = page.locator(f'{root} .tanem-service-card .tanem-service-options').first
+        if options.count():
+            summary = options.locator('summary')
+            text = summary.locator('.tanem-options-label').inner_text()
+            assert text.endswith(' +'), 'The plus sign must share the same underline and animation as the label'
+            if mobile:
+                assert summary.bounding_box()['height'] <= 30, 'Disclosure hit area must not inflate a service card'
+            summary.click(timeout=9000)
+            expect(options).to_have_attribute('open', '')
+            summary.click(timeout=9000)
+            expect(options).not_to_have_attribute('open', '')
 
     team_section = page.locator("#salonDesktopTeam" if desktop else "#tn13Team")
     reviews_section = page.locator("#salonDesktopReviews" if desktop else "#tn13Reviews")

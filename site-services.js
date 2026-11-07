@@ -38,7 +38,7 @@
     const tariffRows=variants.map(v=>'<div><dt>'+escape(localize(v.label,lang))+'</dt><dd>'+escape(normalizePrice(localize(v.price,lang)))+'</dd></div>').join('');
     const tariffs=tariffRows?'<dl class="tanem-service-tariffs">'+tariffRows+'</dl>':'';
     const optionsLabel=service.variantType==='length'?(lang==='en'?'Prices by hair length':'Стоимость по длине'):(lang==='en'?'Options and prices':'Варианты и цены');
-    const options=variants.length?'<details class="tanem-service-options"><summary>'+optionsLabel+'</summary>'+tariffs+'</details>':'';
+    const options=variants.length?'<details class="tanem-service-options"><summary><span class="tanem-options-label">'+escape(optionsLabel)+' +</span></summary><div class="tanem-options-panel">'+tariffs+'</div></details>':'';
     const prose=copy?'<div class="tanem-service-description"><p id="'+escape(id)+'">'+escape(copy)+'</p><button class="tanem-service-more" type="button" aria-expanded="false" aria-controls="'+escape(id)+'">'+(lang==='en'?'Read more':'Подробнее')+'</button></div>':'';
     return '<article class="'+(device==='desktop'?'dct-service-card':'tn31-service-row')+' tanem-service-card" data-eva-service-id="'+escape(service.id)+'" data-eva-profile="'+escape(service.profileId||'catalogue')+'" data-eva-layout="'+device+'" data-eva-lang="'+lang+'">'+
       '<div class="tanem-service-copy"><strong class="tanem-service-title '+(device==='desktop'?'dct-service-card-title':'tn31-service-name')+'">'+escape(title).replace(/([+/])/g,'$1<wbr>')+'</strong>'+
@@ -57,6 +57,31 @@
   }
   function enhance(scope){
     scope.querySelectorAll('.tanem-service-card').forEach(card=>{
+      const options=card.querySelector('.tanem-service-options');
+      if(options&&!options.dataset.bound){
+        options.dataset.bound='true';
+        const summary=options.querySelector('summary'),panel=options.querySelector('.tanem-options-panel');
+        const label=summary.querySelector('.tanem-options-label');
+        // A shared wall-clock phase keeps new and existing rows glinting together.
+        label.style.animationDelay='-'+Math.round(performance.now()%5000)+'ms';
+        const baseLabel=label.textContent.slice(0,-2);
+        let animation=null,expanded=options.open;
+        const updateLabel=()=>{label.textContent=baseLabel+(expanded?' −':' +')};
+        summary.addEventListener('click',event=>{
+          event.preventDefault();event.stopPropagation();
+          const from=panel.getBoundingClientRect().height;
+          animation?.cancel();animation=null;
+          expanded=!expanded;
+          options.open=true;updateLabel();
+          const reduce=global.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+          const to=expanded?panel.scrollHeight:0;
+          if(reduce||Math.abs(to-from)<1){options.open=expanded;return}
+          animation=panel.animate([{height:from+'px',opacity:expanded?0.5:1},{height:to+'px',opacity:expanded?1:0.5}],{
+            duration:250,easing:'cubic-bezier(.22,1,.36,1)'
+          });
+          animation.onfinish=()=>{animation=null;options.open=expanded};
+        });
+      }
       const button=card.querySelector('.tanem-service-more');
       if(button&&!button.dataset.bound){
         button.dataset.bound='true';
@@ -86,7 +111,7 @@
       oldBook.setAttribute('aria-label',newBook.getAttribute('aria-label'));newBook.replaceWith(oldBook);
       card.replaceChildren(...next.childNodes);card.dataset.evaLang=lang;
       const options=card.querySelector('.tanem-service-options');
-      if(options)options.open=!!optionsOpen;
+      if(options){options.open=!!optionsOpen;const label=options.querySelector('.tanem-options-label');if(label&&options.open)label.textContent=label.textContent.replace(/ \+$/,' −')}
       if(expanded){const button=card.querySelector('.tanem-service-more');if(button){button.setAttribute('aria-expanded','true');button.textContent=lang==='en'?'Collapse':'Свернуть';button.parentElement.classList.add('is-expanded')}}
     });
     enhance(document);

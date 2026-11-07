@@ -6933,7 +6933,7 @@
   ],
   "masterReviews": {
     "enabled": false,
-    "previewMasterId": "darya-hairdresser"
+    "previewMasterId": null
   }
 };
   const rows=[];
