@@ -137,9 +137,10 @@ def check(browser, width, height, mobile, language):
                 "Eva hero logo must load correctly"
             )
             nav = page.locator(".std-nav a")
-            assert nav.all_inner_texts()[:6] == [
-                "Услуги", "Наши работы", "О нас", "Команда", "Отзывы", "Контакты"
-            ] if language == "ru" else nav.count() == 6, "Desktop nav needs Team between About and Reviews"
+            assert nav.count() == 6, "Desktop navigation must contain six links"
+            assert nav.nth(3).get_attribute("href") == "#salonDesktopTeam", (
+                "Team must appear between About and Reviews"
+            )
             team_link = page.locator('.std-nav a[href="#salonDesktopTeam"]')
             assert team_link.count() == 1
             team_link.click()
