@@ -72,6 +72,7 @@
         <a href="#salonDesktopServices">Услуги</a>
         <a href="#salonDesktopPortfolio">Наши работы</a>
         <a href="#salonDesktopAbout">О нас</a>
+        <a href="#salonDesktopTeam">Команда</a>
         <a href="#salonDesktopReviews">Отзывы</a>
         <a href="#salonDesktopContacts">Контакты</a>
       </nav>
@@ -90,7 +91,7 @@
         <div class="std-hero-frame">
           <div class="std-copy-inner">
 
-          <h1 class="std-logo">SALON NAME</h1>
+          <h1 class="std-logo std-logo-image"><img src="logo.png" alt="Ева" decoding="async"></h1>
 
 
           <p class="std-tagline">Ваша красота. Ваша уверенность.</p>
@@ -1263,7 +1264,7 @@
     ["15 000 ₽","15 000 ₽","15 000 ₽"],
     ["от 6 000 ₽","from 6 000 ₽","from 6 000 ₽"],
     ['Услуги','Ծառայություններ','Services'],['Наши работы','Մեր աշխատանքները','Our work'],['О нас','Մեր մասին','About us'],
-    ['Отзывы','Կարծիքներ','Reviews'],['Контакты','Կոնտակտներ','Contacts'],['Салон красоты','Գեղեցկության սրահ','Beauty salon'],
+    ['Команда','Թիմ','Team'],['Отзывы','Կարծիքներ','Reviews'],['Контакты','Կոնտակտներ','Contacts'],['Салон красоты','Գեղեցկության սրահ','Beauty salon'],
     ['Ваша красота. Ваша уверенность.','Ձեր գեղեցկությունը։ Ձեր վստահությունը։','Your beauty. Your confidence.'],
     ['Салон красоты в самом сердце Города.','Գեղեցկության սրահ Քաղաքի սրտում։','A beauty salon in the heart of City.'],['Листайте вниз','Սահեցրեք ներքև','Scroll down'],['Город,','Քաղաք,','City,'],['Адрес салона','Սրահի հասցե','Адрес салона'],
     ['Записаться','Ամրագրել','Book now'],['Записаться →','Ամրագրել →','Book now →'],['Записаться онлайн','Ամրագրել առցանց','Book online'],['Смотреть работы','Դիտել աշխատանքները','View our work'],
