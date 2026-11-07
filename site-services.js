@@ -63,7 +63,8 @@
         const summary=options.querySelector('summary'),panel=options.querySelector('.tanem-options-panel');
         const label=summary.querySelector('.tanem-options-label');
         // A shared wall-clock phase keeps new and existing rows glinting together.
-        label.style.animationDelay='-'+Math.round(performance.now()%5000)+'ms';
+        const syncGlint=()=>{label.style.animationDelay='-'+Math.round(performance.now()%5000)+'ms'};
+        syncGlint();
         const baseLabel=label.textContent.slice(0,-2);
         let animation=null,expanded=options.open;
         const updateLabel=()=>{label.textContent=baseLabel+(expanded?' −':' +')};
@@ -75,11 +76,11 @@
           options.open=true;updateLabel();
           const reduce=global.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
           const to=expanded?panel.scrollHeight:0;
-          if(reduce||Math.abs(to-from)<1){options.open=expanded;return}
+          if(reduce||Math.abs(to-from)<1){options.open=expanded;if(!expanded)syncGlint();return}
           animation=panel.animate([{height:from+'px',opacity:expanded?0.5:1},{height:to+'px',opacity:expanded?1:0.5}],{
             duration:250,easing:'cubic-bezier(.22,1,.36,1)'
           });
-          animation.onfinish=()=>{animation=null;options.open=expanded};
+          animation.onfinish=()=>{animation=null;options.open=expanded;if(!expanded)syncGlint()};
         });
       }
       const button=card.querySelector('.tanem-service-more');
