@@ -261,11 +261,10 @@ def check(browser, width, height, mobile, language):
 
             # Verify that opening and closing both visibly animate the panel.
             page.emulate_media(reduced_motion='no-preference')
-            summary.click(timeout=9000)
-            expect(options).to_have_attribute('open', '')
-            # Sample the active animation at its midpoint. This avoids relying
-            # on browser frame timing (WebKit can still be on its first frame).
+            # Start and sample in one browser task so CI transport latency cannot
+            # consume the entire 260 ms animation before it is inspected.
             opening = page.evaluate("""el => {
+                el.querySelector('summary').click();
                 const panel = el.querySelector('.tanem-options-panel');
                 const animation = panel.getAnimations().find(a => a.playState === 'running');
                 if (!animation) return {running:false, height:panel.getBoundingClientRect().height, contentHeight:panel.scrollHeight};
@@ -286,8 +285,8 @@ def check(browser, width, height, mobile, language):
                 arg=options.element_handle(), timeout=2000
             )
 
-            summary.click(timeout=9000)
             closing = page.evaluate("""el => {
+                el.querySelector('summary').click();
                 const panel = el.querySelector('.tanem-options-panel');
                 const animation = panel.getAnimations().find(a => a.playState === 'running');
                 if (!animation) return {running:false, height:panel.getBoundingClientRect().height, contentHeight:panel.scrollHeight};
