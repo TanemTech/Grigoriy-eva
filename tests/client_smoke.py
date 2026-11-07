@@ -216,22 +216,17 @@ def check(browser, width, height, mobile, language):
             page.emulate_media(reduced_motion='no-preference')
             summary.click(timeout=9000)
             expect(options).to_have_attribute('open', '')
-            # Wait past the initial zero-height frame, then verify the panel is
-            # visibly between its collapsed and fully expanded heights.
-            page.wait_for_function(
-                "el => { const panel = el.querySelector('.tanem-options-panel'); "
-                "const height = panel.getBoundingClientRect().height; "
-                "return panel.getAnimations().some(a => a.playState === 'running') "
-                "&& height > 0 && height < panel.scrollHeight; }",
-                arg=options.element_handle(), timeout=500
-            )
+            # Sample the active animation at its midpoint. This avoids relying
+            # on browser frame timing (WebKit can still be on its first frame).
             opening = page.evaluate("""el => {
                 const panel = el.querySelector('.tanem-options-panel');
-                return {
-                    running: panel.getAnimations().some(animation => animation.playState === 'running'),
-                    height: panel.getBoundingClientRect().height,
-                    contentHeight: panel.scrollHeight
-                };
+                const animation = panel.getAnimations().find(a => a.playState === 'running');
+                if (!animation) return {running:false, height:panel.getBoundingClientRect().height, contentHeight:panel.scrollHeight};
+                animation.pause();
+                animation.currentTime = 130;
+                const height = panel.getBoundingClientRect().height;
+                animation.play();
+                return {running:true, height, contentHeight:panel.scrollHeight};
             }""", options.element_handle())
             assert opening['running'], 'Opening the option-price panel must animate'
             assert 0 < opening['height'] < opening['contentHeight'], (
@@ -245,20 +240,15 @@ def check(browser, width, height, mobile, language):
             )
 
             summary.click(timeout=9000)
-            page.wait_for_function(
-                "el => { const panel = el.querySelector('.tanem-options-panel'); "
-                "const height = panel.getBoundingClientRect().height; "
-                "return panel.getAnimations().some(a => a.playState === 'running') "
-                "&& height > 0 && height < panel.scrollHeight; }",
-                arg=options.element_handle(), timeout=500
-            )
             closing = page.evaluate("""el => {
                 const panel = el.querySelector('.tanem-options-panel');
-                return {
-                    running: panel.getAnimations().some(animation => animation.playState === 'running'),
-                    height: panel.getBoundingClientRect().height,
-                    contentHeight: panel.scrollHeight
-                };
+                const animation = panel.getAnimations().find(a => a.playState === 'running');
+                if (!animation) return {running:false, height:panel.getBoundingClientRect().height, contentHeight:panel.scrollHeight};
+                animation.pause();
+                animation.currentTime = 130;
+                const height = panel.getBoundingClientRect().height;
+                animation.play();
+                return {running:true, height, contentHeight:panel.scrollHeight};
             }""", options.element_handle())
             assert closing['running'], 'Closing the option-price panel must animate'
             assert 0 < closing['height'] < closing['contentHeight'], (
