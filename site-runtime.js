@@ -462,7 +462,7 @@
       stopServiceToggle();stopReviewMotion();
       const sameMaster=renderedMasterId===master.id;
       const servicesExpanded=sameMaster&&target.querySelector('[data-master-expand]')?.getAttribute('aria-expanded')==='true';
-      const openOptions=new Set(sameMaster?[...target.querySelectorAll('.tanem-service-options[open]')].map(node=>node.closest('[data-eva-service-id]').dataset.evaServiceId):[]);
+      const openOptions=new Set(sameMaster?[...target.querySelectorAll('.tanem-service-options')].filter(node=>node.dataset.expanded===undefined?node.open:node.dataset.expanded==='true').map(node=>node.closest('[data-eva-service-id]').dataset.evaServiceId):[]);
       renderedMasterId=master.id;renderedLang=lang;
       const items=(data.services||[]).filter(item=>master.serviceIds?.length?master.serviceIds.includes(item.id):(master.categories||[]).includes(item.category));
       const works=masterGallery(master);
@@ -527,7 +527,15 @@
       window.TANEM_SERVICES.enhance(target);
       target.querySelectorAll('[data-eva-service-id]').forEach(card=>{
         const options=card.querySelector('.tanem-service-options');
-        if(options){options.open=openOptions.has(card.dataset.evaServiceId);const label=options.querySelector('.tanem-options-label');if(options.open&&label)label.textContent=label.textContent.replace(/ \+$/,' −')}
+        if(options){
+          const isOpen=openOptions.has(card.dataset.evaServiceId);
+          options.open=isOpen;
+          options.dataset.expanded=String(isOpen);
+          const summary=options.querySelector('summary');
+          summary?.setAttribute('aria-expanded',String(isOpen));
+          const label=options.querySelector('.tanem-options-label');
+          if(label)label.textContent=label.textContent.slice(0,-2)+(isOpen?' −':' +');
+        }
       });
       updateNav();
     }
