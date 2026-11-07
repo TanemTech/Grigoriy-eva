@@ -734,7 +734,7 @@ services.insertAdjacentElement('afterend',about);
       document.body.style.width='';
       document.body.style.overflow='';
       document.body.style.touchAction='';
-      window.scrollTo({top:lockedScrollY,left:0,behavior:'auto'});
+      window.scrollTo({top:lockedScrollY,left:0,behavior:'instant'});
       requestAnimationFrame(()=>{document.documentElement.style.scrollBehavior=previousScrollBehavior});
     }
   }
