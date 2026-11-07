@@ -801,10 +801,10 @@ html[data-br-device] .tanem-service-options summary:focus-visible{outline:2px so
 }
 
 /* Main catalogue only: one regular underline and a clean white glint. */
-html[data-br-device] :is(#salonDesktopServices,#tn13Services) .tanem-service-options summary{
+html[data-br-device] :is(#stdServiceList,#salonDesktopServices,#tn13Services) .tanem-service-options summary{
   text-decoration:none!important;
 }
-html[data-br-device] :is(#salonDesktopServices,#tn13Services) .tanem-service-options .tanem-options-label{
+html[data-br-device] :is(#stdServiceList,#salonDesktopServices,#tn13Services) .tanem-service-options .tanem-options-label{
   --tanem-options-base:#dedbd7;
   border-bottom:1px solid var(--tanem-options-base);
   background-image:linear-gradient(110deg,var(--tanem-options-base) 28%,#fff 48%,var(--tanem-options-base) 68%);
