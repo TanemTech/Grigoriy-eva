@@ -38,12 +38,12 @@
     const tariffRows=variants.map(v=>'<div><dt>'+escape(localize(v.label,lang))+'</dt><dd>'+escape(normalizePrice(localize(v.price,lang)))+'</dd></div>').join('');
     const tariffs=tariffRows?'<dl class="tanem-service-tariffs">'+tariffRows+'</dl>':'';
     const optionsLabel=service.variantType==='length'?(lang==='en'?'Prices by hair length':'Стоимость по длине'):(lang==='en'?'Options and prices':'Варианты и цены');
-    const options=variants.length>2?'<details class="tanem-service-options"><summary>'+optionsLabel+'</summary>'+tariffs+'</details>':tariffs;
+    const options=variants.length?'<details class="tanem-service-options"><summary>'+optionsLabel+'</summary>'+tariffs+'</details>':'';
+    const prose=copy?'<div class="tanem-service-description"><p id="'+escape(id)+'">'+escape(copy)+'</p><button class="tanem-service-more" type="button" aria-expanded="false" aria-controls="'+escape(id)+'">'+(lang==='en'?'Read more':'Подробнее')+'</button></div>':'';
     return '<article class="'+(device==='desktop'?'dct-service-card':'tn31-service-row')+' tanem-service-card" data-eva-service-id="'+escape(service.id)+'" data-eva-profile="'+escape(service.profileId||'catalogue')+'" data-eva-layout="'+device+'" data-eva-lang="'+lang+'">'+
       '<div class="tanem-service-copy"><strong class="tanem-service-title '+(device==='desktop'?'dct-service-card-title':'tn31-service-name')+'">'+escape(title).replace(/([+/])/g,'$1<wbr>')+'</strong>'+
-      options+'</div>'+
+      options+prose+'</div>'+
       '<div class="tanem-service-side">'+(time?'<small class="tanem-service-duration">'+escape(time)+'</small>':'')+(price?priceMarkup(price,device):'<span class="tanem-service-price">'+book+'</span>')+'</div>'+
-      (copy?'<div class="tanem-service-description"><p id="'+escape(id)+'">'+escape(copy)+'</p><button class="tanem-service-more" type="button" aria-expanded="false" aria-controls="'+escape(id)+'">'+(lang==='en'?'Read more':'Подробнее')+'</button></div>':'')+
       '<button class="tanem-service-book" type="button" '+(device==='desktop'?'data-service-book':'data-book-service')+' aria-label="'+book+': '+escape(title)+'"></button></article>';
   }
   function measure(card){

@@ -409,6 +409,7 @@
     if(!overlay)return;
     let selectedId='';
     let renderedMasterId='',renderedLang='';
+    let stopServiceToggle=()=>{},stopReviewMotion=()=>{};
     let historyEntryOpen=false;
     let restoringHistoryProfile=false;
     const historyKey='tanemMasterProfile';
@@ -422,7 +423,6 @@
       '.tn22-viewer.open .tn22-view-close',
       '#tn13Gallery.open .tn22-gallery-back'
     ];
-    const tabs=['about','services','portfolio','reviews'];
     const copy={
       ru:{about:'О мастере',services:'Услуги',portfolio:'Портфолио',reviews:'Отзывы',book:'Записаться',more:'Показать весь прайс',less:'Свернуть прайс',emptyServices:'Услуги уточняются в салоне.',emptyPortfolio:'Фотографии по этому направлению пока не добавлены.',portfolioNote:'Примеры работ студии по направлению мастера',emptyReviews:'Персональные отзывы пока не добавлены.',source:'Источник: Sonline',view:'Открыть профиль в Sonline',none:'Длительность уточняется'},
       en:{about:'About',services:'Services',portfolio:'Portfolio',reviews:'Reviews',book:'Book',more:'Show full price list',less:'Collapse price list',emptyServices:'Check services with the salon.',emptyPortfolio:'Studio gallery photos for this specialty are not available yet.',portfolioNote:'Studio work examples in this specialty',emptyReviews:'Individual reviews are not available yet.',source:'Source: Sonline',view:'Open Sonline profile',none:'Duration on request'}
@@ -448,27 +448,34 @@
       const name=text(review.author,lang);
       const rating=Number(review.rating);
       const stars=Number.isInteger(rating)&&rating>=1&&rating<=5?'★'.repeat(rating):'';
-      return '<article class="tanem-master-review '+(desktop?'std-review-card':'tn30-review-card')+'"'+(duplicate?' data-review-duplicate aria-hidden="true"':'')+'>'+
-        '<div class="'+(desktop?'std-review-head':'tn30-review-head')+'"><span class="'+(desktop?'std-review-avatar':'tn30-review-avatar')+'">'+esc([...String(name)][0]||'S')+'</span><span><strong class="'+(desktop?'std-review-name':'tn30-review-name')+'">'+esc(name)+'</strong><span class="'+(desktop?'std-review-meta':'tn30-review-meta')+'">'+esc(text(review.source,lang))+'</span>'+(stars?'<span class="tanem-master-stars">'+stars+'</span>':'')+'</span></div>'+
+      const url=review.url||data.contacts.reviewsUrl;
+      const source=text(review.source,lang)+(review.preview?' · '+(lang==='en'?'TEST':'ТЕСТ'):'');
+      return '<a class="tanem-master-review '+(desktop?'std-review-card':'tn30-review-card')+'" href="'+esc(url)+'" target="_blank" rel="noopener noreferrer"'+(duplicate?' data-review-duplicate aria-hidden="true" tabindex="-1"':'')+'>'+
+        '<div class="'+(desktop?'std-review-head':'tn30-review-head')+'"><span class="'+(desktop?'std-review-avatar':'tn30-review-avatar')+'">'+esc([...String(name)][0]||'S')+'</span><span><strong class="'+(desktop?'std-review-name':'tn30-review-name')+'">'+esc(name)+'</strong><span class="'+(desktop?'std-review-meta':'tn30-review-meta')+'">'+esc(source)+(desktop?'':' '+stars)+'</span>'+(desktop&&stars?'<span class="std-review-stars">'+stars+'</span>':'')+'</span></div>'+
         '<p class="'+(desktop?'std-review-text':'')+'">'+esc(text(review.text,lang))+'</p>'+
-        '<button class="tanem-master-review-more" type="button" aria-expanded="false"'+(duplicate?' tabindex="-1"':'')+' hidden>'+esc(lang==='en'?'Read full review':'Читать полностью')+'</button></article>';
+        '<span class="'+(desktop?'std-review-more':'tn30-review-open')+'">'+esc(lang==='en'?'Read more':'Подробнее')+' →</span></a>';
     }
     function render(master){
       const lang=currentLang()==='en'?'en':'ru',words=copy[lang];
       const target=overlay.querySelector(desktop?'#stdMasterPageContent':'.tn22-master-body');
       if(!target)return;
+      stopServiceToggle();stopReviewMotion();
       const sameMaster=renderedMasterId===master.id;
       const servicesExpanded=sameMaster&&target.querySelector('[data-master-expand]')?.getAttribute('aria-expanded')==='true';
       const openOptions=new Set(sameMaster?[...target.querySelectorAll('.tanem-service-options[open]')].map(node=>node.closest('[data-eva-service-id]').dataset.evaServiceId):[]);
       renderedMasterId=master.id;renderedLang=lang;
       const items=(data.services||[]).filter(item=>master.serviceIds?.length?master.serviceIds.includes(item.id):(master.categories||[]).includes(item.category));
       const works=masterGallery(master);
-      const reviews=profileReviews(master,lang);
+      const visibleWorks=desktop&&works.length>=3?works.slice(0,Math.min(9,Math.floor(works.length/3)*3)):works;
+      const reviewPreview=desktop&&data.masterReviews?.previewMasterId===master.id;
+      const reviewsEnabled=data.masterReviews?.enabled!==false;
+      const originalReviews=profileReviews(master,lang);
+      const reviews=reviewPreview?[...originalReviews,...originalReviews].map(review=>({...review,preview:true})):(reviewsEnabled?originalReviews:[]);
+      const tabs=['about','services','portfolio',...(reviews.length?['reviews']:[])];
       const name=text(master.name,lang),role=text(master.role,lang),avatar=typeof master.photo==='string'?master.photo:master.photo?.src;
       const genitives={'Юлия':'Юлии','Эльвира':'Эльвиры','Дарья':'Дарьи','Анна':'Анны','Марина':'Марины','Олеся':'Олеси'};
       const moreLabel=lang==='en'?'Show all services by '+name:'Показать все услуги '+(genitives[name]||name);
       const lessLabel=lang==='en'?'Collapse services':'Свернуть услуги';
-      const profileUrl=/^https:\/\/widget\.sonline\.su\//.test(master.bookingUrl||'')?master.bookingUrl:'';
       const sections=[
         '<section class="tanem-master-section" id="tanem-master-about"><h3>'+esc(words.about)+'</h3><p class="tanem-master-bio">'+esc(biography(master,lang))+'</p></section>',
         '<section class="tanem-master-section" id="tanem-master-services"><h3>'+esc(words.services)+'</h3>'+
@@ -477,12 +484,11 @@
             '<p class="tanem-master-empty">'+esc(words.emptyServices)+'</p>')+
           (items.length>6?'<button class="tanem-master-more" type="button" aria-expanded="'+String(!!servicesExpanded)+'" data-master-expand>'+esc(servicesExpanded?lessLabel:moreLabel)+' <span>'+(servicesExpanded?'↑':'↓')+'</span></button>':'')+'</section>',
         '<section class="tanem-master-section" id="tanem-master-portfolio"><h3>'+esc(words.portfolio)+'</h3>'+
-          (works.length?'<p class="tanem-master-gallery-note">'+esc(words.portfolioNote)+'</p><div class="tanem-master-gallery'+(works.length<=2||works.length===4?' is-paired':'')+'">'+works.map((item,i)=>'<button type="button" data-master-work="'+i+'" aria-label="'+esc(lang==='en'?'View photo':'Посмотреть фотографию')+'"><img src="'+esc(item.src)+'" alt="'+esc(text(item.alt,lang))+'" loading="lazy"></button>').join('')+'</div>':
+          (works.length?'<p class="tanem-master-gallery-note">'+esc(words.portfolioNote)+'</p><div class="tanem-master-gallery'+(visibleWorks.length<=2?' is-paired':'')+'">'+visibleWorks.map((item,i)=>'<button type="button" data-master-work="'+i+'" aria-label="'+esc(lang==='en'?'View photo':'Посмотреть фотографию')+'"><img src="'+esc(item.src)+'" alt="'+esc(text(item.alt,lang))+'" loading="lazy"></button>').join('')+'</div><button class="tanem-master-more" type="button" data-master-gallery>'+esc(lang==='en'?'Open gallery':'Открыть галерею')+' <span aria-hidden="true">→</span></button>':
             '<p class="tanem-master-empty">'+esc(words.emptyPortfolio)+'</p>')+'</section>',
-        '<section class="tanem-master-section" id="tanem-master-reviews"><h3>'+esc(words.reviews)+'</h3>'+
-          (reviews.length?'<div class="tanem-master-review-window"><div class="tanem-master-review-track">'+reviews.map(review=>reviewMarkup(review,lang)).join('')+reviews.map(review=>reviewMarkup(review,lang,true)).join('')+'</div></div>':
-            '<p class="tanem-master-empty">'+esc(words.emptyReviews)+'</p>')+
-          (profileUrl?'<a class="tanem-master-source-link" href="'+esc(profileUrl)+'" target="_blank" rel="noopener noreferrer">'+esc(words.view)+' ↗</a>':'')+'</section>'
+        reviews.length?'<section class="tanem-master-section" id="tanem-master-reviews"><h3>'+esc(words.reviews)+'</h3>'+
+          (reviewPreview?'<p class="tanem-master-gallery-note">'+esc(lang==='en'?'Scroll preview: existing reviews are repeated for testing.':'Проверка прокрутки: существующие отзывы временно повторены для теста.')+'</p>':'')+
+          '<div class="tanem-master-review-window"><div class="tanem-master-review-track">'+reviews.map(review=>reviewMarkup(review,lang)).join('')+(desktop?reviews.map(review=>reviewMarkup(review,lang,true)).join(''):'')+'</div></div></section>':''
       ];
       target.innerHTML='<div class="tanem-master-head"><div class="tanem-master-photo">'+(avatar?'<img src="'+esc(avatar)+'" alt="'+esc(name)+'">':'')+'</div><h2>'+esc(name)+'</h2><p>'+esc(role)+'</p></div><div class="tanem-master-sections">'+sections.join('')+'</div>';
       const existing=overlay.querySelector('.tanem-master-jump');
@@ -504,33 +510,22 @@
         const position=overlay.scrollTop+section.getBoundingClientRect().top-overlay.getBoundingClientRect().top-nav.offsetHeight-32;
         overlay.scrollTo({top:position,behavior:window.matchMedia('(prefers-reduced-motion: reduce)').matches?'instant':'smooth'});
       }));
-      target.querySelector('[data-master-expand]')?.addEventListener('click',event=>{
-        const button=event.currentTarget,expanded=button.getAttribute('aria-expanded')==='true';
-        button.setAttribute('aria-expanded',String(!expanded));
+      const moreButton=target.querySelector('[data-master-expand]');
+      if(moreButton)stopServiceToggle=bindServiceToggle(moreButton,target.querySelector('.tanem-master-extra'),()=>{
         const extra=target.querySelector('.tanem-master-extra');
-        if(!expanded&&!extra.childElementCount){
-          extra.innerHTML=items.slice(6).map(item=>serviceMarkup(item,lang,master.id)).join('');
-          window.TANEM_SERVICES.enhance(extra);
-        }
-        extra.hidden=expanded;
-        button.innerHTML=esc(expanded?moreLabel:lessLabel)+' <span>'+(expanded?'↓':'↑')+'</span>';
-        updateNav();
-      });
-      target.querySelectorAll('[data-master-work]').forEach(button=>button.addEventListener('click',()=>{
-        document.dispatchEvent(new CustomEvent('tanem:open-master-gallery',{detail:{items:works.map(item=>({src:item.src,alt:text(item.alt,lang)})),index:Number(button.dataset.masterWork)||0,category:works[Number(button.dataset.masterWork)||0]?.category||'Салон'}}));
-      }));
+        extra.innerHTML=items.slice(6).map(item=>serviceMarkup(item,lang,master.id)).join('');
+        window.TANEM_SERVICES.enhance(extra);
+      },moreLabel,lessLabel,updateNav);
+      const openWorks=(index,showGallery,origin)=>{
+        document.dispatchEvent(new CustomEvent('tanem:open-master-gallery',{detail:{
+          items:works.map(item=>({src:item.src,alt:text(item.alt,lang)})),index,
+          category:works[index]?.category||works[0]?.category||'Салон',showGallery,origin
+        }}));
+      };
+      target.querySelectorAll('[data-master-work]').forEach(button=>button.addEventListener('click',()=>openWorks(Number(button.dataset.masterWork)||0,false,button)));
+      target.querySelector('[data-master-gallery]')?.addEventListener('click',event=>openWorks(0,true,event.currentTarget));
       const track=target.querySelector('.tanem-master-review-track');
-      if(track)startMasterReviews(track,overlay);
-      target.querySelectorAll('.tanem-master-review').forEach(card=>{
-        const paragraph=card.querySelector('p'),button=card.querySelector('.tanem-master-review-more');
-        button.hidden=paragraph.scrollHeight<=paragraph.clientHeight+1;
-        button.addEventListener('click',()=>{
-          const expanded=card.classList.toggle('is-expanded');
-          button.setAttribute('aria-expanded',String(expanded));
-          button.textContent=lang==='en'?(expanded?'Collapse':'Read full review'):(expanded?'Свернуть':'Читать полностью');
-          updateNav();
-        });
-      });
+      if(track)stopReviewMotion=startMasterReviews(track,overlay);
       const book=overlay.querySelector(desktop?'#stdMasterPageBook':'.tn22-master-book');
       if(book){
         const names={'Юлия':'Юлии','Эльвира':'Эльвире','Дарья':'Дарье','Анна':'Анне','Марина':'Марине','Олеся':'Олесе'};
@@ -543,29 +538,89 @@
       });
       updateNav();
     }
+    // Use the catalogue's height animation and follow the collapse button in
+    // the profile's own scroll container, with cleanup for rapid reversals.
+    function bindServiceToggle(button,extra,populate,moreLabel,lessLabel,updateNav){
+      let frame=0,timer=0,run=0,savedAnchor=null;
+      const unlock=()=>{if(savedAnchor!==null){overlay.style.overflowAnchor=savedAnchor;savedAnchor=null}};
+      const stabilize=anchorTop=>{
+        const delta=button.getBoundingClientRect().top-anchorTop;
+        if(Number.isFinite(delta)&&Math.abs(delta)>.5)overlay.scrollTo({top:Math.max(0,overlay.scrollTop+delta),behavior:'instant'});
+      };
+      button.onclick=()=>{
+        const expanded=button.getAttribute('aria-expanded')!=='true';
+        const anchorTop=button.getBoundingClientRect().top;
+        const startHeight=extra.hidden?0:extra.getBoundingClientRect().height;
+        const token=++run;
+        clearTimeout(timer);cancelAnimationFrame(frame);extra.ontransitionend=null;
+        if(savedAnchor===null){savedAnchor=overlay.style.overflowAnchor;overlay.style.overflowAnchor='none'}
+        if(expanded&&!extra.childElementCount)populate();
+        button.setAttribute('aria-expanded',String(expanded));
+        button.innerHTML=esc(expanded?lessLabel:moreLabel)+' <span>'+(expanded?'↑':'↓')+'</span>';
+        extra.hidden=false;
+        extra.style.transition='none';extra.style.height=startHeight+'px';
+        const endHeight=expanded?extra.scrollHeight:0;
+        const duration=window.matchMedia('(prefers-reduced-motion: reduce)').matches?0:400;
+        const finish=()=>{
+          if(token!==run)return;
+          cancelAnimationFrame(frame);clearTimeout(timer);extra.ontransitionend=null;
+          extra.style.transition='none';extra.hidden=!expanded;extra.style.height=expanded?'auto':'';
+          if(!expanded)stabilize(anchorTop);
+          unlock();updateNav();
+        };
+        if(!duration||Math.abs(startHeight-endHeight)<1){finish();return}
+        extra.offsetHeight;
+        extra.style.transition='height '+duration+'ms cubic-bezier(.22,1,.36,1)';
+        const follow=()=>{
+          if(token!==run)return;
+          stabilize(anchorTop);updateNav();frame=requestAnimationFrame(follow);
+        };
+        frame=requestAnimationFrame(()=>{
+          if(token!==run)return;
+          extra.style.height=endHeight+'px';
+          if(!expanded)follow();
+        });
+        extra.ontransitionend=event=>{if(event.target===extra&&event.propertyName==='height')finish()};
+        timer=setTimeout(finish,duration+100);
+        updateNav();
+      };
+      return ()=>{++run;clearTimeout(timer);cancelAnimationFrame(frame);extra.ontransitionend=null;unlock()};
+    }
     function startMasterReviews(track,container){
       const viewport=track.parentElement;
+      // Touch reviews use a normal swipe rail, so a readable card stays still.
+      if(!desktop){viewport.classList.add('is-static');return ()=>{}}
       const originals=[...track.querySelectorAll('.tanem-master-review:not([data-review-duplicate])')];
-      const contentWidth=originals.reduce((sum,card)=>sum+card.getBoundingClientRect().width,0)+Math.max(0,originals.length-1)*14;
+      const gap=parseFloat(getComputedStyle(track).gap)||16;
+      const contentWidth=originals.reduce((sum,card)=>sum+card.getBoundingClientRect().width,0)+Math.max(0,originals.length-1)*gap;
       const staticReviews=contentWidth<=viewport.clientWidth||window.matchMedia('(prefers-reduced-motion: reduce)').matches;
       viewport.classList.toggle('is-static',staticReviews);
-      if(staticReviews)return;
-      let offset=0,last=0,dragX=0,dragging=false;
-      const width=track.scrollWidth/2;
+      if(staticReviews)return ()=>{};
+      const width=contentWidth+gap;
+      let offset=0,last=0,dragX=0,dragging=false,moved=false,frame=0,stopped=false;
       const move=timestamp=>{
-        if(!track.isConnected||!container.classList.contains('open'))return;
-        const paused=track.matches(':hover,:focus-within')||track.querySelector('.is-expanded');
+        if(stopped||!track.isConnected||!container.classList.contains('open'))return;
+        const paused=track.matches(':hover,:focus-within');
         if(!paused&&!dragging&&last&&width)offset-=Math.min((timestamp-last)*.024,1.8);
         if(width){offset=((offset%width)-width)%width;track.style.transform='translate3d('+offset+'px,0,0)'}
-        last=timestamp;requestAnimationFrame(move);
+        last=timestamp;frame=requestAnimationFrame(move);
       };
+      track.addEventListener('dragstart',event=>event.preventDefault());
       track.addEventListener('pointerdown',event=>{
-        if(event.target.closest('button,a'))return;
-        dragging=true;dragX=event.clientX;track.setPointerCapture(event.pointerId);
+        if(event.button!==0)return;
+        dragging=true;moved=false;dragX=event.clientX;
       });
-      track.addEventListener('pointermove',event=>{if(!dragging)return;offset+=event.clientX-dragX;dragX=event.clientX});
+      track.addEventListener('pointermove',event=>{
+        if(!dragging)return;
+        const delta=event.clientX-dragX;
+        if(!moved&&Math.abs(delta)<4)return;
+        moved=true;track.setPointerCapture(event.pointerId);
+        offset+=delta;dragX=event.clientX;event.preventDefault();
+      });
       ['pointerup','pointercancel','lostpointercapture'].forEach(type=>track.addEventListener(type,()=>{dragging=false}));
-      requestAnimationFrame(move);
+      track.addEventListener('click',event=>{if(moved){event.preventDefault();event.stopPropagation();moved=false}},true);
+      frame=requestAnimationFrame(move);
+      return ()=>{stopped=true;cancelAnimationFrame(frame)};
     }
     // Profile service rows AND its persistent booking CTA use one familiar chooser.
     overlay.addEventListener('click',event=>{
@@ -580,6 +635,7 @@
     },true);
     new MutationObserver(()=>{
       if(!overlay.classList.contains('open')){
+        stopServiceToggle();stopReviewMotion();
         // Reopening from browser Forward may remove .closing before the next
         // animation frame adds .open. That intermediate state is not a close.
         if(restoringHistoryProfile)return;

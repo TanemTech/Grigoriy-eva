@@ -15,6 +15,8 @@ for (const layout of ['desktop','mobile']) {
   const html=view.render(service,layout,'ru');
   assert.equal((html.match(/<dt>/g)||[]).length,2);
   assert.equal((html.match(/<dd>/g)||[]).length,2);
+  assert.match(html,/<details class="tanem-service-options"><summary>Варианты и цены<\/summary>/);
+  assert.doesNotMatch(html,/<details[^>]*\bopen\b/);
   assert.doesNotMatch(html,/is-tariff-description/);
   assert.match(html,/>Индивидуальный уход\./);
   assert.match(html,/tanem-service-price">/);

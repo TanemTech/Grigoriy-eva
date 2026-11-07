@@ -6434,8 +6434,8 @@
         "tg": "Косметолог"
       },
       "about": {
-        "ru": "Я Юлия, косметолог салона «Ева». Моя специализация — уход за кожей и косметологические процедуры для лица.",
-        "en": "I’m Julia, a cosmetologist at Eva salon. I specialize in skincare and facial treatments."
+        "ru": "Занимаюсь уходом за кожей лица и косметологическими процедурами. В моей работе важны деликатность, внимание к состоянию кожи и вашим пожеланиям. Хочу, чтобы забота о себе была понятной и комфортной — от выбора процедуры до ежедневного ухода.",
+        "en": "I work with skincare and facial treatments. A gentle approach, attention to your skin and your wishes are central to my work. I want caring for yourself to feel clear and comfortable, from choosing a treatment to your daily routine."
       },
       "photo": "team-01.webp",
       "categories": [
@@ -6464,8 +6464,8 @@
         "tg": "Парикмахер"
       },
       "about": {
-        "ru": "Я Эльвира, парикмахер салона «Ева». Выполняю стрижки и окрашивания волос.",
-        "en": "I’m Elvira, a hairdresser at Eva salon. My work includes haircuts and hair coloring."
+        "ru": "Работаю со стрижками и окрашиванием волос. Мне важно, чтобы форма и цвет сочетались с вашим образом, а причёска радовала и в повседневной жизни. Люблю продуманные перемены, в которых сохраняется ваша индивидуальность.",
+        "en": "I work with haircuts and hair coloring. I value a shape and color that suit your look and a hairstyle you enjoy every day. I like thoughtful changes that preserve your individuality."
       },
       "photo": "team-02.webp",
       "categories": [
@@ -6493,8 +6493,8 @@
         "tg": "Парикмахер"
       },
       "about": {
-        "ru": "Я Дарья, парикмахер салона «Ева». Занимаюсь стрижками и окрашиванием волос, в том числе окрашиванием в блонд.",
-        "en": "I’m Darya, a hairdresser at Eva salon. I do haircuts and hair coloring, including blonde coloring."
+        "ru": "Занимаюсь стрижками и окрашиванием, в том числе работой с блондом. Для меня красивый образ складывается из деталей — оттенка, формы и того, как волосы выглядят в движении. Мне важно услышать ваши пожелания и помочь найти решение, с которым вам будет комфортно.",
+        "en": "I work with haircuts and coloring, including blonde shades. To me, a beautiful look comes from the details: color, shape and the way hair moves. I value listening to your wishes and helping you find a look you feel comfortable with."
       },
       "photo": "team-03.webp",
       "categories": [
@@ -6523,8 +6523,8 @@
         "tg": "Бровист / лэшмейкер"
       },
       "about": {
-        "ru": "Я Анна, мастер по бровям и ресницам салона «Ева». Моя специализация — оформление бровей и работа с ресницами.",
-        "en": "I’m Anna, a brow and lash artist at Eva salon. I specialize in brow shaping and lash services."
+        "ru": "Оформляю брови и работаю с ресницами. Мне близки выразительные образы, в которых каждая деталь подчёркивает природную красоту. Важны и форма, и оттенок, и общий баланс — чтобы результат гармонично сочетался с вашими чертами и привычным стилем.",
+        "en": "I work with brows and lashes. I appreciate expressive looks where each detail enhances natural beauty. Shape, shade and overall balance all matter, so the result feels harmonious with your features and everyday style."
       },
       "photo": "team-04.webp",
       "categories": [
@@ -6550,8 +6550,8 @@
         "tg": "Мастер маникюра"
       },
       "about": {
-        "ru": "Я Марина, мастер ногтевого сервиса салона «Ева». Выполняю маникюр и педикюр.",
-        "en": "I’m Marina, a nail artist at Eva salon. My work includes manicures and pedicures."
+        "ru": "Выполняю маникюр и педикюр. Ценю аккуратность, внимание к деталям и спокойную атмосферу во время процедуры. Для меня важно, чтобы ухоженные руки и стопы радовали вас каждый день, а выбранные форма и покрытие были удобными в привычном ритме жизни.",
+        "en": "I provide manicures and pedicures. I value precision, attention to detail and a calm atmosphere during your appointment. I want you to enjoy well-groomed hands and feet, with a shape and finish that feel comfortable in everyday life."
       },
       "photo": "team-05.webp",
       "categories": [
@@ -6580,8 +6580,8 @@
         "tg": "Мастер маникюра"
       },
       "about": {
-        "ru": "Я Олеся, мастер маникюра салона «Ева». Занимаюсь маникюром и оформлением ногтей.",
-        "en": "I’m Olesya, a nail artist at Eva salon. I specialize in manicures and nail design."
+        "ru": "Занимаюсь маникюром и оформлением ногтей. Люблю, когда цвет и дизайн отражают ваше настроение — будь то сдержанное покрытие или заметный акцент. В работе для меня важны аккуратные детали и возможность воплотить ваши пожелания в цельный, продуманный образ.",
+        "en": "I work with manicures and nail design. I enjoy color and design that reflect your mood, from an understated finish to a distinctive accent. Careful details and bringing your wishes together into a considered look are important to me."
       },
       "photo": "team-06.webp",
       "categories": [
@@ -6930,7 +6930,11 @@
       },
       "url": "https://yandex.com/maps/org/yeva/1179517154/"
     }
-  ]
+  ],
+  "masterReviews": {
+    "enabled": false,
+    "previewMasterId": "darya-hairdresser"
+  }
 };
   const rows=[];
   const collect=value=>{

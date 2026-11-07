@@ -42,7 +42,18 @@ def check_master_navigation(page, desktop):
         viewer = page.locator('#stdGallery' if desktop else '.tn22-viewer')
         photo.click()
         expect(viewer).to_have_class(open_class)
+        gallery_button = viewer.locator('.std-view-gallery' if desktop else '.tn22-view-gallery')
+        expect(gallery_button).to_be_visible()
+        gallery_button.click()
+        gallery = page.locator('#stdGalleryBrowser' if desktop else '#tn13Gallery')
+        expect(gallery).to_have_class(open_class)
+        # The profile gallery must preserve exactly the same photo set as its viewer.
+        tiles = gallery.locator('.std-gallery-browser-tile' if desktop else '.tn22-gallery-tile')
+        assert tiles.count() >= profile.locator('[data-master-work]').count()
+        gallery_tabs = gallery.locator('#stdGalleryBrowserTabs' if desktop else '.tn22-gallery-tabs-wrap')
+        expect(gallery_tabs).to_be_hidden()
         page.keyboard.press('Escape')
+        expect(gallery).not_to_have_class(open_class)
         expect(viewer).not_to_have_class(open_class)
         expect(profile).to_have_class(open_class)
         if desktop:
