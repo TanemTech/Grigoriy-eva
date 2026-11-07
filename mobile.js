@@ -165,6 +165,9 @@ function renderGallery(){
    openViewer(galleryScopeItems||GALLERY[galleryCat]||[],Number(tile.dataset.gi)||0,'gallery');
   };
  }
+ const galleryLang=document.body.dataset.brLang==='en'?'en':'ru';
+ const salonName=SITE.salon.name;
+ gallery.querySelector('.tn22-gallery-title span').textContent=typeof salonName==='string'?salonName:(salonName[galleryLang]||salonName.ru||salonName.en||'');
  gallery.querySelector('.tn22-gallery-tabs-wrap').hidden=!!galleryScopeItems;
  gallery.querySelectorAll('[data-gcat]').forEach(tab=>tab.classList.toggle('active',tab.dataset.gcat===galleryCat));
  const grid=gallery.querySelector('.tn22-gallery-grid');

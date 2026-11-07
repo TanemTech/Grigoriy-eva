@@ -52,6 +52,7 @@ def check_master_navigation(page, desktop):
         assert tiles.count() >= profile.locator('[data-master-work]').count()
         gallery_tabs = gallery.locator('#stdGalleryBrowserTabs' if desktop else '.tn22-gallery-tabs-wrap')
         expect(gallery_tabs).to_be_hidden()
+        assert "SALON NAME" not in gallery.inner_text(), "Lazy gallery must render the client brand"
         page.keyboard.press('Escape')
         expect(gallery).not_to_have_class(open_class)
         expect(viewer).not_to_have_class(open_class)
