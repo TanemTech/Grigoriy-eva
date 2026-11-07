@@ -62,25 +62,58 @@
         options.dataset.bound='true';
         const summary=options.querySelector('summary'),panel=options.querySelector('.tanem-options-panel');
         const label=summary.querySelector('.tanem-options-label');
-        // A shared wall-clock phase keeps new and existing rows glinting together.
-        const syncGlint=()=>{label.style.animationDelay='-'+Math.round(performance.now()%5000)+'ms'};
-        syncGlint();
         const baseLabel=label.textContent.slice(0,-2);
-        let animation=null,expanded=options.open;
-        const updateLabel=()=>{label.textContent=baseLabel+(expanded?' −':' +')};
+        const initialExpanded=options.dataset.expanded===undefined?options.open:options.dataset.expanded==='true';
+        let animation=null,animationTimer=0,animationRun=0;
+        const syncGlint=()=>{label.style.animationDelay='-'+Math.round(performance.now()%5000)+'ms'};
+        const updateLabel=expanded=>{
+          label.textContent=baseLabel+(expanded?' −':' +');
+          summary.setAttribute('aria-expanded',String(expanded));
+          options.dataset.expanded=String(expanded);
+        };
+        updateLabel(initialExpanded);
+        syncGlint();
         summary.addEventListener('click',event=>{
           event.preventDefault();event.stopPropagation();
+          const wasVisible=options.open;
           const from=panel.getBoundingClientRect().height;
+          const computedOpacity=wasVisible?Number.parseFloat(getComputedStyle(panel).opacity):0;
           animation?.cancel();animation=null;
-          expanded=!expanded;
-          options.open=true;updateLabel();
+          global.clearTimeout(animationTimer);
+          const run=++animationRun;
+          const expanded=options.dataset.expanded!=='true';
+          options.open=true;
+          updateLabel(expanded);
           const reduce=global.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
           const to=expanded?panel.scrollHeight:0;
-          if(reduce||Math.abs(to-from)<1){options.open=expanded;if(!expanded)syncGlint();return}
-          animation=panel.animate([{height:from+'px',opacity:expanded?0.5:1},{height:to+'px',opacity:expanded?1:0.5}],{
-            duration:250,easing:'cubic-bezier(.22,1,.36,1)'
-          });
-          animation.onfinish=()=>{animation=null;options.open=expanded;if(!expanded)syncGlint()};
+          const fromOpacity=Number.isFinite(computedOpacity)?computedOpacity:0;
+          const duration=260;
+          if(reduce||typeof panel.animate!=='function'||Math.abs(to-from)<1){
+            panel.style.removeProperty('overflow');
+            options.open=expanded;
+            if(!expanded)syncGlint();
+            return;
+          }
+          panel.style.overflow='hidden';
+          const current=panel.animate(
+            [{height:from+'px',opacity:fromOpacity},{height:to+'px',opacity:expanded?1:0}],
+            {duration,easing:'cubic-bezier(.22,1,.36,1)'}
+          );
+          animation=current;
+          const finish=()=>{
+            if(run!==animationRun)return;
+            global.clearTimeout(animationTimer);
+            animation=null;
+            panel.style.removeProperty('overflow');
+            options.open=expanded;
+            if(!expanded)syncGlint();
+          };
+          current.onfinish=finish;
+          animationTimer=global.setTimeout(()=>{
+            if(run!==animationRun)return;
+            current.cancel();
+            finish();
+          },duration+180);
         });
       }
       const button=card.querySelector('.tanem-service-more');
@@ -104,7 +137,8 @@
       if(card.dataset.evaLang===lang)return;
       const service=data.services.find(s=>s.id===card.dataset.evaServiceId);if(!service)return;
       const expanded=card.querySelector('.tanem-service-more')?.getAttribute('aria-expanded')==='true';
-      const optionsOpen=card.querySelector('.tanem-service-options')?.open;
+      const currentOptions=card.querySelector('.tanem-service-options');
+      const optionsOpen=currentOptions?(currentOptions.dataset.expanded===undefined?currentOptions.open:currentOptions.dataset.expanded==='true'):false;
       const holder=document.createElement('div');holder.innerHTML=render({...service,profileId:card.dataset.evaProfile},card.dataset.evaLayout,lang);
       const next=holder.firstElementChild;
       // Keep booking listeners on the existing button when changing the language.
@@ -112,7 +146,14 @@
       oldBook.setAttribute('aria-label',newBook.getAttribute('aria-label'));newBook.replaceWith(oldBook);
       card.replaceChildren(...next.childNodes);card.dataset.evaLang=lang;
       const options=card.querySelector('.tanem-service-options');
-      if(options){options.open=!!optionsOpen;const label=options.querySelector('.tanem-options-label');if(label&&options.open)label.textContent=label.textContent.replace(/ \+$/,' −')}
+      if(options){
+        options.open=!!optionsOpen;
+        options.dataset.expanded=String(!!optionsOpen);
+        const summary=options.querySelector('summary');
+        summary.setAttribute('aria-expanded',String(!!optionsOpen));
+        const label=options.querySelector('.tanem-options-label');
+        if(label)label.textContent=label.textContent.slice(0,-2)+(optionsOpen?' −':' +');
+      }
       if(expanded){const button=card.querySelector('.tanem-service-more');if(button){button.setAttribute('aria-expanded','true');button.textContent=lang==='en'?'Collapse':'Свернуть';button.parentElement.classList.add('is-expanded')}}
     });
     enhance(document);

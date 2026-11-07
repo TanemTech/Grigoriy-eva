@@ -147,14 +147,75 @@ def check(browser, width, height, mobile, language):
         options = page.locator(f'{root} .tanem-service-card .tanem-service-options').first
         if options.count():
             summary = options.locator('summary')
-            text = summary.locator('.tanem-options-label').inner_text()
+            label = summary.locator('.tanem-options-label')
+            text = label.inner_text()
             assert text.endswith(' +'), 'The plus sign must share the same underline and animation as the label'
+            summary_decoration = summary.evaluate('el => getComputedStyle(el).textDecorationLine')
+            label_style = label.evaluate("""el => {
+                const style = getComputedStyle(el);
+                return {
+                    base: style.getPropertyValue('--tanem-options-base').trim(),
+                    border: style.borderBottomWidth,
+                    shine: style.backgroundImage
+                };
+            }""")
+            assert summary_decoration == 'none', 'The catalogue label must not receive a second underline'
+            assert label_style['border'] == '1px', 'The catalogue underline must be a single normal 1px line'
+            assert label_style['base'] == '#dedbd7', 'The main service catalogue needs a clearer light-grey base'
+            assert '255, 255, 255' in label_style['shine'], 'The catalogue glint must travel toward white'
+
+            # The master-profile palette is intentionally independent from the main catalogue.
+            profile_palette = page.evaluate("""() => {
+                const host = document.createElement('div');
+                host.className = 'tanem-master-price-list';
+                const details = document.createElement('details');
+                details.className = 'tanem-service-options';
+                const summary = document.createElement('summary');
+                const label = document.createElement('span');
+                label.className = 'tanem-options-label';
+                summary.appendChild(label);
+                details.appendChild(summary);
+                host.appendChild(details);
+                document.body.appendChild(host);
+                const style = getComputedStyle(label);
+                const result = {
+                    base: style.getPropertyValue('--tanem-options-base').trim(),
+                    shine: style.backgroundImage
+                };
+                host.remove();
+                return result;
+            }""")
+            assert profile_palette['base'] == '#6f6258', 'Master-profile label colour must remain unchanged'
+            assert '249, 224, 167' in profile_palette['shine'], 'Master-profile glint must keep its original colour'
+
             if mobile:
                 assert summary.bounding_box()['height'] <= 30, 'Disclosure hit area must not inflate a service card'
+
+            # Exercise fast reversals while the height animation is still running.
+            page.emulate_media(reduced_motion='no-preference')
             summary.click(timeout=9000)
-            expect(options).to_have_attribute('open', '')
             summary.click(timeout=9000)
-            expect(options).not_to_have_attribute('open', '')
+            expect(options).not_to_have_attribute('open', '', timeout=2000)
+            assert summary.get_attribute('aria-expanded') == 'false'
+
+            summary.click(timeout=9000)
+            summary.click(timeout=9000)
+            summary.click(timeout=9000)
+            expect(options).to_have_attribute('open', '', timeout=2000)
+            panel = options.locator('.tanem-options-panel')
+            page.wait_for_function(
+                "(el) => { const panel = el.querySelector('.tanem-options-panel'); "
+                "return el.open && Math.abs(panel.getBoundingClientRect().height - panel.scrollHeight) < 1; }",
+                arg=options.element_handle(),
+                timeout=2000
+            )
+            assert summary.get_attribute('aria-expanded') == 'true'
+            assert panel.bounding_box()['height'] > 0, 'Expanded tariff panel must be fully visible'
+
+            summary.click(timeout=9000)
+            expect(options).not_to_have_attribute('open', '', timeout=2000)
+            assert summary.get_attribute('aria-expanded') == 'false'
+            page.emulate_media(reduced_motion='reduce')
 
     team_section = page.locator("#salonDesktopTeam" if desktop else "#tn13Team")
     reviews_section = page.locator("#salonDesktopReviews" if desktop else "#tn13Reviews")
