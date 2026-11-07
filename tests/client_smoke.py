@@ -144,6 +144,12 @@ def check(browser, width, height, mobile, language):
         assert page.locator(".tanem-service-card .tanem-service-price").count() == cards.count()
         if desktop:
             assert page.locator('#stdServiceTabs [data-service-category="all"]').count() == 0
+        # Root coloring is in the hair category, not the initial manicure category.
+        hair_category = (
+            page.locator('#stdServiceTabs [data-service-category="Волосы"]') if desktop
+            else page.locator('#tn13Services [data-scat="Волосы"]')
+        )
+        hair_category.click(timeout=9000)
         catalogue_root = "#stdServiceList" if desktop else "#tn13Services"
         options = page.locator(f'{catalogue_root} .tanem-service-card .tanem-service-options').first
         assert options.count(), "The main service catalogue must expose its option-price controls"
