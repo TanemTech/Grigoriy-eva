@@ -799,6 +799,16 @@ html[data-br-device] .tanem-service-options summary:focus-visible{outline:2px so
 @media(prefers-reduced-motion:reduce){
   html[data-br-device] .tanem-service-options .tanem-options-label{animation:none}
 }
+
+/* Main catalogue only: one regular underline and a clean white glint. */
+html[data-br-device] :is(#salonDesktopServices,#tn13Services) .tanem-service-options summary{
+  text-decoration:none!important;
+}
+html[data-br-device] :is(#salonDesktopServices,#tn13Services) .tanem-service-options .tanem-options-label{
+  --tanem-options-base:#dedbd7;
+  border-bottom:1px solid var(--tanem-options-base);
+  background-image:linear-gradient(110deg,var(--tanem-options-base) 28%,#fff 48%,var(--tanem-options-base) 68%);
+}
 :is(#stdMasterOverlay,.tn22-master-page) .tanem-master-extra{overflow:hidden}
 #stdGalleryBrowserTabs[hidden],#tn13Gallery .tn22-gallery-tabs-wrap[hidden]{display:none!important}
 
