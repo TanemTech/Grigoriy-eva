@@ -84,19 +84,35 @@
           const expanded=options.dataset.expanded!=='true';
           options.open=true;
           updateLabel(expanded);
+
+          // A closed <details> hides its panel. Open it, measure its natural
+          // height, then establish a real zero-height start before animating.
+          const naturalHeight=expanded?panel.getBoundingClientRect().height:0;
+          if(!wasVisible&&expanded){
+            panel.style.height='0px';
+            panel.style.opacity='0';
+          }
+          panel.style.overflow='hidden';
+          if(!wasVisible&&expanded)panel.getBoundingClientRect();
+
           const reduce=global.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
-          const to=expanded?panel.scrollHeight:0;
-          const fromOpacity=Number.isFinite(computedOpacity)?computedOpacity:0;
+          const to=expanded?naturalHeight:0;
+          const fromHeight=wasVisible?from:0;
+          const fromOpacity=wasVisible&&Number.isFinite(computedOpacity)?computedOpacity:0;
           const duration=260;
-          if(reduce||typeof panel.animate!=='function'||Math.abs(to-from)<1){
+          const clearPanelStyles=()=>{
+            panel.style.removeProperty('height');
+            panel.style.removeProperty('opacity');
             panel.style.removeProperty('overflow');
+          };
+          if(reduce||typeof panel.animate!=='function'||Math.abs(to-fromHeight)<1){
+            clearPanelStyles();
             options.open=expanded;
             if(!expanded)syncGlint();
             return;
           }
-          panel.style.overflow='hidden';
           const current=panel.animate(
-            [{height:from+'px',opacity:fromOpacity},{height:to+'px',opacity:expanded?1:0}],
+            [{height:fromHeight+'px',opacity:fromOpacity},{height:to+'px',opacity:expanded?1:0}],
             {duration,easing:'cubic-bezier(.22,1,.36,1)'}
           );
           animation=current;
@@ -104,7 +120,7 @@
             if(run!==animationRun)return;
             global.clearTimeout(animationTimer);
             animation=null;
-            panel.style.removeProperty('overflow');
+            clearPanelStyles();
             options.open=expanded;
             if(!expanded)syncGlint();
           };
