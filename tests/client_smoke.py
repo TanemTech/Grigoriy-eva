@@ -144,7 +144,19 @@ def check(browser, width, height, mobile, language):
         assert page.locator(".tanem-service-card .tanem-service-price").count() == cards.count()
         if desktop:
             assert page.locator('#stdServiceTabs [data-service-category="all"]').count() == 0
-        options = page.locator(f'{root} .tanem-service-card .tanem-service-options').first
+        catalogue_root = "#stdServiceList" if desktop else "#tn13Services"
+        options = page.locator(f'{catalogue_root} .tanem-service-card .tanem-service-options').first
+        assert options.count(), "The main service catalogue must expose its option-price controls"
+        root_coloring = page.locator(
+            f'{catalogue_root} [data-eva-service-id="hair-root-coloring"] .tanem-service-options'
+        )
+        assert root_coloring.count(), "Root-coloring options must remain in the main service catalogue"
+        root_label = root_coloring.locator('.tanem-options-label')
+        assert root_label.evaluate('el => getComputedStyle(el).borderBottomWidth') == '1px'
+        assert root_coloring.locator('summary').evaluate(
+            'el => getComputedStyle(el).textDecorationLine'
+        ) == 'none', "Root-coloring options need one thin underline, not a default text underline"
+
         if options.count():
             summary = options.locator('summary')
             label = summary.locator('.tanem-options-label')
@@ -191,8 +203,46 @@ def check(browser, width, height, mobile, language):
             if mobile:
                 assert summary.bounding_box()['height'] <= 30, 'Disclosure hit area must not inflate a service card'
 
-            # Exercise fast reversals while the height animation is still running.
+            # Verify that opening and closing both visibly animate the panel.
             page.emulate_media(reduced_motion='no-preference')
+            summary.click(timeout=9000)
+            expect(options).to_have_attribute('open', '')
+            opening = page.evaluate("""el => {
+                const panel = el.querySelector('.tanem-options-panel');
+                return {
+                    running: panel.getAnimations().some(animation => animation.playState === 'running'),
+                    height: panel.getBoundingClientRect().height,
+                    contentHeight: panel.scrollHeight
+                };
+            }""", options.element_handle())
+            assert opening['running'], 'Opening the option-price panel must animate'
+            assert 0 < opening['height'] < opening['contentHeight'], (
+                f'Opening must begin gradually, not jump to full height: {opening}'
+            )
+            page.wait_for_function(
+                "el => { const panel = el.querySelector('.tanem-options-panel'); "
+                "return el.open && !panel.getAnimations().some(a => a.playState === 'running') "
+                "&& panel.getBoundingClientRect().height > 0; }",
+                arg=options.element_handle(), timeout=2000
+            )
+
+            summary.click(timeout=9000)
+            closing = page.evaluate("""el => {
+                const panel = el.querySelector('.tanem-options-panel');
+                return {
+                    running: panel.getAnimations().some(animation => animation.playState === 'running'),
+                    height: panel.getBoundingClientRect().height,
+                    contentHeight: panel.scrollHeight
+                };
+            }""", options.element_handle())
+            assert closing['running'], 'Closing the option-price panel must animate'
+            assert 0 < closing['height'] < closing['contentHeight'], (
+                f'Closing must collapse gradually: {closing}'
+            )
+            expect(options).not_to_have_attribute('open', '', timeout=2000)
+            assert summary.get_attribute('aria-expanded') == 'false'
+
+            # Exercise fast reversals while the height animation is still running.
             summary.click(timeout=9000)
             summary.click(timeout=9000)
             expect(options).not_to_have_attribute('open', '', timeout=2000)
