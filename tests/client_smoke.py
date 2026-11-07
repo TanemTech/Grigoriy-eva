@@ -54,7 +54,8 @@ def check_master_navigation(page, desktop):
         tiles = gallery.locator('.std-gallery-browser-tile' if desktop else '.tn22-gallery-tile')
         gallery_tabs = gallery.locator('#stdGalleryBrowserTabs' if desktop else '.tn22-gallery-tabs-wrap')
         expect(gallery_tabs).to_be_visible()
-        active = gallery_tabs.locator('.active').first.text_content().strip()
+        active_tab = gallery_tabs.locator('.active').first
+        active = active_tab.get_attribute('data-gallery-category' if desktop else 'data-gcat')
         expected = page.evaluate('(category) => window.TANEM_SITE_DATA.media.gallery[category]?.length', active)
         assert expected and tiles.count() == expected, (
             f'Master gallery category {active!r} should contain all {expected} photos, got {tiles.count()}'
