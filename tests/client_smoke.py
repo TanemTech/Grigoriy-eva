@@ -216,6 +216,15 @@ def check(browser, width, height, mobile, language):
             page.emulate_media(reduced_motion='no-preference')
             summary.click(timeout=9000)
             expect(options).to_have_attribute('open', '')
+            # Wait past the initial zero-height frame, then verify the panel is
+            # visibly between its collapsed and fully expanded heights.
+            page.wait_for_function(
+                "el => { const panel = el.querySelector('.tanem-options-panel'); "
+                "const height = panel.getBoundingClientRect().height; "
+                "return panel.getAnimations().some(a => a.playState === 'running') "
+                "&& height > 0 && height < panel.scrollHeight; }",
+                arg=options.element_handle(), timeout=500
+            )
             opening = page.evaluate("""el => {
                 const panel = el.querySelector('.tanem-options-panel');
                 return {
@@ -236,6 +245,13 @@ def check(browser, width, height, mobile, language):
             )
 
             summary.click(timeout=9000)
+            page.wait_for_function(
+                "el => { const panel = el.querySelector('.tanem-options-panel'); "
+                "const height = panel.getBoundingClientRect().height; "
+                "return panel.getAnimations().some(a => a.playState === 'running') "
+                "&& height > 0 && height < panel.scrollHeight; }",
+                arg=options.element_handle(), timeout=500
+            )
             closing = page.evaluate("""el => {
                 const panel = el.querySelector('.tanem-options-panel');
                 return {
