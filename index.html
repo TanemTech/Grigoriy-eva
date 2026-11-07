@@ -55,7 +55,7 @@ html.br-booting #salon-mobile,html.br-booting #salon-desktop-v1{visibility:hidde
   const palettePreload=document.createElement('link');
   palettePreload.rel='preload';
   palettePreload.as='style';
-  palettePreload.href='salon-palette.css?v=eva-profile-close-20261108
+  palettePreload.href='salon-palette.css?v=eva-profile-close-20261108';
   document.head.appendChild(palettePreload);
   document.head.appendChild(preload);
  }
@@ -110,10 +110,10 @@ html.br-booting #salon-mobile,html.br-booting #salon-desktop-v1{visibility:hidde
    }else ready();
  }
  const script=document.createElement('script');
- script.src=desktop?'desktop.js?v=eva-hero-team-final-20261107-v1':'mobile.js?v=eva-profile-close-20261108
+ script.src=desktop?'desktop.js?v=eva-hero-team-final-20261107-v1':'mobile.js?v=eva-profile-close-20261108';
  script.async=false;script.onload=()=>{
    const runtime=document.createElement('script');
-   runtime.src='site-runtime.js?v=eva-profile-close-20261108
+   runtime.src='site-runtime.js?v=eva-profile-close-20261108';
    runtime.async=false;runtime.onload=loaded;
    runtime.onerror=()=>{if(closed)error.classList.add('is-visible')};
    document.body.appendChild(runtime);
