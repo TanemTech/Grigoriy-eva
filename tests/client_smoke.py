@@ -129,6 +129,24 @@ def check(browser, width, height, mobile, language):
     must_equal(page.locator(brand), data["salon"]["name"][language], "brand")
     if desktop:
         assert page.locator(".std-header-brand-main img").count() == 0, "Desktop header must always use one-line text branding"
+        if data.get("media", {}).get("logo") == "logo.png":
+            hero_logo = page.locator("#salonDesktopTop h1.std-logo-image img")
+            assert hero_logo.count() == 1, "Eva hero should show exactly one logo image"
+            assert hero_logo.get_attribute("src") == "logo.png"
+            assert hero_logo.evaluate("(img) => img.complete && img.naturalWidth > 0"), (
+                "Eva hero logo must load correctly"
+            )
+            nav = page.locator(".std-nav a")
+            assert nav.count() == 6, "Desktop navigation must contain six links"
+            assert nav.nth(3).get_attribute("href") == "#salonDesktopTeam", (
+                "Team must appear between About and Reviews"
+            )
+            team_link = page.locator('.std-nav a[href="#salonDesktopTeam"]')
+            assert team_link.count() == 1
+            team_link.click()
+            assert page.evaluate("location.hash") == "#salonDesktopTeam", (
+                "Team nav link must navigate to the existing team section"
+            )
     if desktop and data.get("media", {}).get("hero"):
         hero = data["media"]["hero"][0]
         expected_hero = hero if isinstance(hero, str) else hero.get("src")
