@@ -78,7 +78,8 @@ def check_master_navigation(page, desktop):
 
     review_section = profile.locator('#tanem-master-reviews')
     expect(review_section).to_be_visible()
-    assert 'пока не добавлены' in review_section.inner_text().lower(), 'Master reviews need a neutral empty state'
+    review_empty = 'пока не добавлены' if page.evaluate('document.documentElement.lang') == 'ru' else 'not been added'
+    assert review_empty in review_section.inner_text().lower(), 'Master reviews need a localized neutral empty state'
     assert 'Проверка прокрутки' not in profile.inner_text(), 'Test copy must never appear on a client site'
     assert profile.locator('.tanem-master-review').count() == 0, 'Temporary testimonials must be removed'
 
