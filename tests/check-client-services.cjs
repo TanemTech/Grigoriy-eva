@@ -3,6 +3,15 @@ const fs = require('node:fs');
 const vm = require('node:vm');
 const {loadSiteData} = require('./validate-site-data.cjs');
 const data = loadSiteData('site-data.js');
+const unusedLocales = new Set(['ru','en','hy','uz','tg'].filter(locale=>!data.locales.includes(locale)));
+function checkLocaleData(value, path='site') {
+  if(!value||typeof value!=='object')return;
+  for(const [key,item] of Object.entries(value)) {
+    assert.ok(!unusedLocales.has(key), `${path}.${key}: inactive locale in client data`);
+    checkLocaleData(item, `${path}.${key}`);
+  }
+}
+checkLocaleData(data);
 const window = {TANEM_SITE_DATA:data};
 vm.runInNewContext(fs.readFileSync('site-services.js','utf8'),{window});
 const view = window.TANEM_SERVICES;
