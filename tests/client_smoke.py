@@ -100,16 +100,32 @@ def check_master_navigation(page, desktop):
 
 
     # Closing a different specialist must never restore the previous one.
+    page.emulate_media(reduced_motion='no-preference')
     triggers = page.locator('#salonDesktopTeam [data-desktop-master]:not([hidden])' if desktop else '#tn13Team [data-mid]')
     for i in range(triggers.count()):
         button = triggers.nth(i)
         button.click(timeout=9000)
         expect(profile).to_have_class(open_class)
+        team = page.locator('#salonDesktopTeam' if desktop else '#tn13Team')
+        team_top = team.bounding_box()['y']
         close_button.click()
-        page.wait_for_timeout(700)
+        if not desktop:
+            positions = page.evaluate('''() => new Promise(resolve => {
+                const positions = [], start = performance.now();
+                function sample(now) {
+                    positions.push(document.querySelector('#tn13Team').getBoundingClientRect().top);
+                    if (now - start < 700) requestAnimationFrame(sample);
+                    else resolve(positions);
+                }
+                requestAnimationFrame(sample);
+            })''')
+            assert max(abs(y - team_top) for y in positions) <= 2, 'Team must stay in place throughout profile closing'
+        else:
+            page.wait_for_timeout(700)
         expect(profile).not_to_have_class(open_class)
         assert not page.evaluate('history.state?.tanemMasterProfile'), 'Closed profile must not survive in history state'
         expect(button).to_be_visible()
+    page.emulate_media(reduced_motion='reduce')
 
 
 def check(browser, width, height, mobile, language):
