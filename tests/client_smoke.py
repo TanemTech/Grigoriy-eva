@@ -206,7 +206,7 @@ def check(browser, width, height, mobile, language):
             page.wait_for_function(
                 "(el) => { const panel = el.querySelector('.tanem-options-panel'); "
                 "return el.open && Math.abs(panel.getBoundingClientRect().height - panel.scrollHeight) < 1; }",
-                options.element_handle(),
+                arg=options.element_handle(),
                 timeout=2000
             )
             assert summary.get_attribute('aria-expanded') == 'true'
