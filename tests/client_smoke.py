@@ -99,6 +99,19 @@ def check_master_navigation(page, desktop):
     expect(profile).not_to_have_class(open_class)
 
 
+    # Closing a different specialist must never restore the previous one.
+    triggers = page.locator('#salonDesktopTeam [data-desktop-master]:not([hidden])' if desktop else '#tn13Team [data-mid]')
+    for i in range(triggers.count()):
+        button = triggers.nth(i)
+        button.click(timeout=9000)
+        expect(profile).to_have_class(open_class)
+        close_button.click()
+        page.wait_for_timeout(700)
+        expect(profile).not_to_have_class(open_class)
+        assert not page.evaluate('history.state?.tanemMasterProfile'), 'Closed profile must not survive in history state'
+        expect(button).to_be_visible()
+
+
 def check(browser, width, height, mobile, language):
     context = browser.new_context(
         viewport={"width": width, "height": height},
